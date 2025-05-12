@@ -1,0 +1,28 @@
+# Node
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Next.js
+.next
+out
+
+# 环境变量
+.env*
+
+# Mac 系统文件
+.DS_Store
+
+# VSCode
+.vscode
+
+# 日志
+logs
+*.log
+
+# 其它
+coverage
+.idea
+*.swp 
