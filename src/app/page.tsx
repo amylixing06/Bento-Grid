@@ -108,22 +108,28 @@ export default function Home() {
               />
               <div className="flex justify-end">
                 <button
-                  onClick={() => {
-                    if (bentoRef.current) {
-                      // 临时加桌面端样式
-                      bentoRef.current.classList.add(EXPORT_DESKTOP_CLASS);
-                      import('html-to-image').then(({ toPng }) => {
-                        toPng(bentoRef.current as HTMLElement, { quality: 1.0, pixelRatio: 2 }).then((dataUrl) => {
-                          // 导出后移除桌面端样式
-                          bentoRef.current && bentoRef.current.classList.remove(EXPORT_DESKTOP_CLASS);
-                          const link = document.createElement('a');
-                          link.download = '新视力.png';
-                          link.href = dataUrl;
-                          link.click();
-                        }).catch(() => {
-                          bentoRef.current && bentoRef.current.classList.remove(EXPORT_DESKTOP_CLASS);
-                        });
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('http://47.113.229.170/screenshot', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          url: window.location.href,
+                          width: 820,
+                          height: 1200
+                        })
                       });
+                      if (!response.ok) {
+                        alert('截图服务异常');
+                        return;
+                      }
+                      const blob = await response.blob();
+                      const link = document.createElement('a');
+                      link.href = URL.createObjectURL(blob);
+                      link.download = 'bento-screenshot.png';
+                      link.click();
+                    } catch (e) {
+                      alert('截图服务异常');
                     }
                   }}
                   className="btn-primary mt-4"

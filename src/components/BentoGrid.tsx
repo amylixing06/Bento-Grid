@@ -112,31 +112,67 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
 
   return (
     <>
-      <div ref={gridRef} className="mx-auto min-h-screen bg-gradient-to-br from-[#232526] to-[#414345] p-4" style={{ width: 900, minWidth: 900, maxWidth: 900 }}>
+      <div ref={gridRef} style={{
+        width: 820,
+        minWidth: 820,
+        maxWidth: 820,
+        borderRadius: 4,
+        margin: '0 auto',
+        minHeight: 0,
+        background: 'linear-gradient(135deg, #232526 0%, #414345 100%)',
+        padding: 24,
+      }}>
         {/* 主标题卡片（始终顶部） */}
-        <div className="px-6">
+        <div style={{ paddingLeft: 24, paddingRight: 24 }}>
           {(title || subtitle) && (
-            <div className="card col-span-full py-8 bg-[#18181b] shadow-xl flex flex-col items-center mb-4">
-              {title && <h1 className="text-5xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-2 text-center tracking-wide">{title}</h1>}
-              {subtitle && <div className="text-lg text-gray-400 mb-2 text-center font-medium tracking-wide">{subtitle}</div>}
+            <div style={{
+              background: '#18181b',
+              borderRadius: 12,
+              boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+              padding: 32,
+              marginBottom: 24,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}>
+              {title && <h1 style={{
+                fontSize: 40,
+                fontWeight: 800,
+                background: 'linear-gradient(90deg, #FFD600 0%, #FF9800 100%)',
+                WebkitBackgroundClip: 'text',
+                color: 'transparent',
+                marginBottom: 8,
+                textAlign: 'center',
+                letterSpacing: 2,
+              }}>{title}</h1>}
+              {subtitle && <div style={{ color: '#bbb', fontSize: 18, marginBottom: 8, textAlign: 'center', fontWeight: 500, letterSpacing: 1 }}>{subtitle}</div>}
             </div>
           )}
         </div>
         {/* 大数字卡片 */}
         {coreNumbers.length > 0 && (
-          <div className="px-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div style={{ paddingLeft: 24, paddingRight: 24 }}>
+            <div style={{ display: 'flex', gap: 24, marginBottom: 24 }}>
               {coreNumbers.map((num, idx) => (
-                <div key={idx} className="card bg-[#18181b] shadow-lg flex flex-col items-center py-8">
-                  <div className="text-5xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-2">{num.number}</div>
-                  <div className="text-base text-gray-300">{num.desc}</div>
+                <div key={idx} style={{
+                  background: '#18181b',
+                  borderRadius: 12,
+                  boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+                  padding: 32,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  flex: 1,
+                }}>
+                  <div style={{ fontSize: 56, fontWeight: 800, color: '#fff', marginBottom: 12 }}>{num.number}</div>
+                  <div style={{ color: '#ccc', fontSize: 18 }}>{num.desc}</div>
                 </div>
               ))}
             </div>
           </div>
         )}
         {/* 分区卡片排版：小于3补空，4=2+2，5=3+2，6=3+3，7=3+2+2，8=3+3+2，9=3+3+3 */}
-        <div className="w-full px-6">
+        <div style={{ width: '100%', paddingLeft: 24, paddingRight: 24 }}>
           {(() => {
             if (!sections || sections.length === 0) return null;
             // 最多9个分区
@@ -171,18 +207,24 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
               layout.push([displaySections[6], displaySections[7], displaySections[8]]);
             }
             return layout.map((row, rowIdx) => (
-              <div key={rowIdx} className="flex w-full gap-6 mb-6">
+              <div key={rowIdx} style={{ display: 'flex', width: '100%', gap: 24, marginBottom: 24 }}>
                 {row.map((section, idx) => (
                   <div
                     key={idx}
-                    className="card py-6 bg-[#18181b] shadow-lg flex flex-col"
                     style={{
+                      background: '#18181b',
+                      borderRadius: 12,
+                      boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+                      padding: 32,
+                      display: 'flex',
+                      flexDirection: 'column',
                       width: `${100 / row.length}%`,
+                      minHeight: 180,
                     }}
                   >
                     {/* 分区标题 */}
                     {section.title && (
-                      <div className="text-2xl font-bold text-white mb-6 flex items-center">
+                      <div style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 24, display: 'flex', alignItems: 'center' }}>
                         {section.title.includes('吸引') && <span className="mr-2">🧲</span>}
                         {section.title.includes('激发') && <span className="mr-2">💡</span>}
                         {section.title.includes('引导') && <span className="mr-2">🚩</span>}
@@ -190,15 +232,15 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
                         {section.title}
                       </div>
                     )}
-                    <ul className="space-y-6">
+                    <ul style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                       {section.items && section.items.map((item, i) => (
                         <li key={i}>
-                          <div className="font-bold text-lg mb-1 flex items-center">
-                            <span className="inline-block px-2 py-1 rounded bg-gradient-to-r from-yellow-400 to-orange-400 text-white mr-2 text-base">
+                          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4, display: 'flex', alignItems: 'center' }}>
+                            <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 6, background: 'linear-gradient(90deg, #FFD600 0%, #FF9800 100%)', color: '#fff', marginRight: 8, fontSize: 16 }}>
                               {item.label}
                             </span>
                           </div>
-                          <div className="text-gray-300 text-base ml-1">{item.value}</div>
+                          <div style={{ color: '#ccc', fontSize: 16, marginLeft: 4 }}>{item.value}</div>
                         </li>
                       ))}
                     </ul>
@@ -210,10 +252,20 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
         </div>
         {/* 标签+二维码+原文信息整合区 */}
         {(tags && tags.length > 0) && (
-          <div className="px-6">
-            <div className="card col-span-full bg-[#18181b] shadow-lg flex flex-row items-center py-4 px-6" style={{ width: '100%', minWidth: 0 }}>
+          <div style={{ paddingLeft: 24, paddingRight: 24 }}>
+            <div style={{
+              background: '#18181b',
+              borderRadius: 12,
+              boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+              padding: 24,
+              width: '100%',
+              minWidth: 0,
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
               {/* 左侧二维码及提示 */}
-              <div className="flex flex-col items-center" style={{ minWidth: 100, marginRight: 32 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 100, marginRight: 32 }}>
                 {meta && meta.url && (
                   <a href={meta.url.startsWith('http') ? meta.url : `https://${meta.url}`} target="_blank" rel="noopener noreferrer">
                     <QRCodeCanvas value={meta.url.startsWith('http') ? meta.url : `https://${meta.url}`} size={100} />
@@ -231,7 +283,7 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
                 <div style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 12, lineHeight: '32px' }}>{meta && meta.title ? meta.title : '原文标题'}</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
                   {tags.map((tag) => (
-                    <span key={tag} className="tag bg-gradient-to-r from-yellow-100 to-orange-200 text-yellow-700 border-0" style={{ fontSize: 16 }}>{tag}</span>
+                    <span key={tag} style={{ display: 'inline-block', padding: '2px 12px', borderRadius: 16, background: 'linear-gradient(90deg, #FFF9C4 0%, #FFE0B2 100%)', color: '#FF9800', fontSize: 16, fontWeight: 600, marginRight: 8, marginBottom: 8 }}>{tag}</span>
                   ))}
                 </div>
                 {meta && meta.author && (
@@ -243,8 +295,19 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
         )}
         {/* 行动号召/结论区 */}
         {cta && (
-          <div className="card col-span-full bg-[#18181b] shadow-lg flex flex-col items-center py-6">
-            <span className="text-lg font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">{cta}</span>
+          <div style={{ paddingLeft: 24, paddingRight: 24 }}>
+            <div style={{
+              background: '#18181b',
+              borderRadius: 12,
+              boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+              padding: 32,
+              marginBottom: 24,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}>
+              <span style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12 }}>{cta}</span>
+            </div>
           </div>
         )}
       </div>
