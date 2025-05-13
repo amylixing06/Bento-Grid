@@ -18,6 +18,9 @@ interface AnalyzedContent {
   sections: string[];
 }
 
+// 导出桌面端样式的 class 名
+const EXPORT_DESKTOP_CLASS = 'force-desktop';
+
 export default function Home() {
   const [content, setContent] = useState<string>('');
   const [analyzedContent, setAnalyzedContent] = useState<AnalyzedContent | null>(null);
@@ -101,12 +104,18 @@ export default function Home() {
                 <button
                   onClick={() => {
                     if (bentoRef.current) {
+                      // 临时加桌面端样式
+                      bentoRef.current.classList.add(EXPORT_DESKTOP_CLASS);
                       import('html-to-image').then(({ toPng }) => {
                         toPng(bentoRef.current as HTMLElement, { quality: 1.0, pixelRatio: 2 }).then((dataUrl) => {
+                          // 导出后移除桌面端样式
+                          bentoRef.current && bentoRef.current.classList.remove(EXPORT_DESKTOP_CLASS);
                           const link = document.createElement('a');
                           link.download = 'bento-grid.png';
                           link.href = dataUrl;
                           link.click();
+                        }).catch(() => {
+                          bentoRef.current && bentoRef.current.classList.remove(EXPORT_DESKTOP_CLASS);
                         });
                       });
                     }
