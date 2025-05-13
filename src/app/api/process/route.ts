@@ -50,7 +50,7 @@ async function extractWechatContent(url: string) {
   }
 }
 
-async function callKimiAPI(content: string): Promise<any> {
+async function callKimiAPI(content: string, systemPrompt: string): Promise<any> {
   let limitedContent = content.length > 3000 ? content.slice(0, 3000) : content;
   const response = await fetch('https://api.moonshot.cn/v1/chat/completions', {
     method: 'POST',
@@ -63,14 +63,14 @@ async function callKimiAPI(content: string): Promise<any> {
       messages: [
         {
           role: 'system',
-          content: `你是顶级产品发布页内容策划师。请根据原文，策划一个现代高端Bento Grid风格的发布页内容，要求如下：\n\n- title：极具冲击力、营销感，10-16字\n- subtitle：一句话总结产品/服务最大亮点\n- coreNumbers：1-3个大数字（如"36T数据""119种语言"），每个配简短说明\n- sections：每区3-5条关键信息，内容精炼有力，禁止长段落/代码/无关内容\n- tags：3-8个关键词，适合胶囊标签展示\n- cta：一句话引导用户体验/关注\n- 只返回如下JSON，不要多余解释：\n{\n  "title": "",\n  "subtitle": "",\n  "coreNumbers": [{"number": "", "desc": ""}],\n  "sections": [{"title": "", "items": [{"label": "", "value": ""}]}],\n  "tags": [],\n  "cta": ""\n}`
+          content: systemPrompt
         },
         {
           role: 'user',
           content: limitedContent
         }
       ],
-      temperature: 0.7,
+      temperature: 0,
     }),
   });
 
@@ -97,6 +97,26 @@ async function retryWithBackoff(fn: () => Promise<any>, retries = 3, delay = 100
     if (retries === 0) throw error;
     await new Promise(resolve => setTimeout(resolve, delay));
     return retryWithBackoff(fn, retries - 1, delay * 2);
+  }
+}
+
+// 新增：通用网页<title>抓取
+async function extractPageTitle(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+    if (!response.ok) return null;
+    const html = await response.text();
+    const match = html.match(/<title>(.*?)<\/title>/i);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+    return null;
+  } catch {
+    return null;
   }
 }
 
@@ -140,10 +160,13 @@ export async function POST(request: Request) {
       }
     }
 
+    // AI prompt 统一为内容摘要与结构化卡片专家
+    const systemPrompt = `你是内容摘要与结构化卡片专家。请将用户输入的内容进行结构化分区，提炼要点，生成摘要和标签，适合以"Bento Grid"卡片形式展示。要求：\n\n- title：高度概括内容主旨，10-16字\n- summary：一句话总结内容亮点\n- sections：每区3-5条关键信息，内容精炼有力，禁止长段落/代码/无关内容\n- tags：3-8个关键词，适合胶囊标签展示\n- 只返回如下JSON，不要多余解释：\n{\n  "title": "",\n  "summary": "",\n  "sections": [{"title": "", "items": [{"label": "", "value": ""}]}],\n  "tags": []\n}`;
+
     // 使用重试机制调用 Kimi API
     const completion = await retryWithBackoff(async () => {
       try {
-        return await callKimiAPI(processedContent);
+        return await callKimiAPI(processedContent, systemPrompt);
       } catch (error: any) {
         console.error('Kimi API 调用失败:', error);
         if (error.code === 'ETIMEDOUT') {
@@ -219,6 +242,16 @@ export async function POST(request: Request) {
       result.sections = newSections;
     }
     result.meta = meta;
+
+    // meta.title: 有链接用原文title，普通链接抓<title>，无链接用AI title
+    if (isUrl && content.includes('mp.weixin.qq.com') && title) {
+      result.meta = { ...meta, title, url: content };
+    } else if (isUrl) {
+      const pageTitle = await extractPageTitle(content);
+      result.meta = { ...meta, title: pageTitle || result.title, url: content };
+    } else {
+      result.meta = { ...meta, title: result.title, url: '' };
+    }
 
     return NextResponse.json(result);
   } catch (error: any) {

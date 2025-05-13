@@ -16,6 +16,9 @@ interface AnalyzedContent {
   author?: string;
   rawContent: string;
   sections: string[];
+  meta?: {
+    url?: string;
+  };
 }
 
 // 导出桌面端样式的 class 名
@@ -26,11 +29,13 @@ export default function Home() {
   const [analyzedContent, setAnalyzedContent] = useState<AnalyzedContent | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const bentoRef = useRef<HTMLDivElement>(null);
 
-  const handleSubmit = async (text: string, isUrl: boolean) => {
+  const handleSubmit = async (text: string, isUrl: boolean): Promise<void> => {
     setIsLoading(true);
     setError(null);
+    setDebugInfo(null);
     try {
       const response = await fetch('/api/process', {
         method: 'POST',
@@ -48,6 +53,7 @@ export default function Home() {
       const data = await response.json();
       setContent(text);
       setAnalyzedContent(data);
+      setDebugInfo('已完成，请查收');
     } catch (err) {
       setError(err instanceof Error ? err.message : '处理内容时出错');
     } finally {
@@ -57,7 +63,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12" style={{ width: 900, minWidth: 900, maxWidth: 900 }}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold gradient-text mb-4">
@@ -69,7 +75,7 @@ export default function Home() {
           </div>
 
           <div className="card mb-8">
-            <InputForm onSubmit={handleSubmit} isLoading={isLoading} placeholder="粘贴链接或输入内容..." hideUrlOption />
+            <InputForm onSubmit={handleSubmit} placeholder="粘贴链接或输入内容..." hideUrlOption debugInfo={debugInfo} />
           </div>
 
           {error && (
@@ -97,7 +103,7 @@ export default function Home() {
                 meta={{
                   title: analyzedContent.title,
                   author: analyzedContent.author,
-                  url: content && content.startsWith('http') ? content : 'www.ainew.cc'
+                  url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
                 }}
               />
               <div className="flex justify-end">

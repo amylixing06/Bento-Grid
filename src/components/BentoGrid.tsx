@@ -112,84 +112,132 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
 
   return (
     <>
-      <div ref={gridRef} className="mx-auto space-y-4 min-h-screen bg-gradient-to-br from-[#232526] to-[#414345] p-4" style={{ width: 900, minWidth: 900, maxWidth: 900 }}>
+      <div ref={gridRef} className="mx-auto min-h-screen bg-gradient-to-br from-[#232526] to-[#414345] p-4" style={{ width: 900, minWidth: 900, maxWidth: 900 }}>
         {/* 主标题卡片（始终顶部） */}
-        {(title || subtitle) && (
-          <div className="card col-span-full py-8 bg-[#18181b] shadow-xl flex flex-col items-center mb-4">
-            {title && <h1 className="text-5xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-2 text-center tracking-wide">{title}</h1>}
-            {subtitle && <div className="text-lg text-gray-400 mb-2 text-center font-medium tracking-wide">{subtitle}</div>}
-          </div>
-        )}
+        <div className="px-6">
+          {(title || subtitle) && (
+            <div className="card col-span-full py-8 bg-[#18181b] shadow-xl flex flex-col items-center mb-4">
+              {title && <h1 className="text-5xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-2 text-center tracking-wide">{title}</h1>}
+              {subtitle && <div className="text-lg text-gray-400 mb-2 text-center font-medium tracking-wide">{subtitle}</div>}
+            </div>
+          )}
+        </div>
         {/* 大数字卡片 */}
         {coreNumbers.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {coreNumbers.map((num, idx) => (
-              <div key={idx} className="card bg-[#18181b] shadow-lg flex flex-col items-center py-8">
-                <div className="text-5xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-2">{num.number}</div>
-                <div className="text-base text-gray-300">{num.desc}</div>
-              </div>
-            ))}
+          <div className="px-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {coreNumbers.map((num, idx) => (
+                <div key={idx} className="card bg-[#18181b] shadow-lg flex flex-col items-center py-8">
+                  <div className="text-5xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-2">{num.number}</div>
+                  <div className="text-base text-gray-300">{num.desc}</div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
-        {/* 分区卡片（AIDA横排，主点大副点小，主点加色块/icon） */}
-        <div
-          className="grid gap-6 p-6 rounded-2xl justify-items-center grid-cols-3"
-        >
-          {sections && sections.length > 0 && sections.map((section, idx) => (
-            <div className="card py-6 bg-[#18181b] shadow-lg flex flex-col" key={idx} style={{ maxWidth: 340, width: '100%' }}>
-              {/* 分区标题 */}
-              <div className="text-2xl font-bold text-white mb-6 flex items-center">
-                {/* 可加icon：AIDA四步可用不同icon，示例用emoji */}
-                {section.title.includes('吸引') && <span className="mr-2">🧲</span>}
-                {section.title.includes('激发') && <span className="mr-2">💡</span>}
-                {section.title.includes('引导') && <span className="mr-2">🚩</span>}
-                {section.title.includes('行动') && <span className="mr-2">⚡</span>}
-                {section.title}
-              </div>
-              <ul className="space-y-6">
-                {section.items && section.items.map((item, i) => (
-                  <li key={i}>
-                    {/* 主点大色块，副点小灰色 */}
-                    <div className="font-bold text-lg mb-1 flex items-center">
-                      <span className="inline-block px-2 py-1 rounded bg-gradient-to-r from-yellow-400 to-orange-400 text-white mr-2 text-base">
-                        {item.label}
-                      </span>
-                    </div>
-                    <div className="text-gray-300 text-base ml-1">{item.value}</div>
-                  </li>
+        {/* 分区卡片排版：小于3补空，4=2+2，5=3+2，6=3+3，7=3+2+2，8=3+3+2，9=3+3+3 */}
+        <div className="w-full px-6">
+          {(() => {
+            if (!sections || sections.length === 0) return null;
+            // 最多9个分区
+            let displaySections = sections.slice(0, 9);
+            // 小于3补空
+            while (displaySections.length < 3) {
+              displaySections.push({ title: '', items: [] });
+            }
+            const layout = [];
+            if (displaySections.length === 3) {
+              layout.push([displaySections[0], displaySections[1], displaySections[2]]);
+            } else if (displaySections.length === 4) {
+              layout.push([displaySections[0], displaySections[1]]);
+              layout.push([displaySections[2], displaySections[3]]);
+            } else if (displaySections.length === 5) {
+              layout.push([displaySections[0], displaySections[1], displaySections[2]]);
+              layout.push([displaySections[3], displaySections[4]]);
+            } else if (displaySections.length === 6) {
+              layout.push([displaySections[0], displaySections[1], displaySections[2]]);
+              layout.push([displaySections[3], displaySections[4], displaySections[5]]);
+            } else if (displaySections.length === 7) {
+              layout.push([displaySections[0], displaySections[1], displaySections[2]]);
+              layout.push([displaySections[3], displaySections[4]]);
+              layout.push([displaySections[5], displaySections[6]]);
+            } else if (displaySections.length === 8) {
+              layout.push([displaySections[0], displaySections[1], displaySections[2]]);
+              layout.push([displaySections[3], displaySections[4], displaySections[5]]);
+              layout.push([displaySections[6], displaySections[7]]);
+            } else if (displaySections.length === 9) {
+              layout.push([displaySections[0], displaySections[1], displaySections[2]]);
+              layout.push([displaySections[3], displaySections[4], displaySections[5]]);
+              layout.push([displaySections[6], displaySections[7], displaySections[8]]);
+            }
+            return layout.map((row, rowIdx) => (
+              <div key={rowIdx} className="flex w-full gap-6 mb-6">
+                {row.map((section, idx) => (
+                  <div
+                    key={idx}
+                    className="card py-6 bg-[#18181b] shadow-lg flex flex-col"
+                    style={{
+                      width: `${100 / row.length}%`,
+                    }}
+                  >
+                    {/* 分区标题 */}
+                    {section.title && (
+                      <div className="text-2xl font-bold text-white mb-6 flex items-center">
+                        {section.title.includes('吸引') && <span className="mr-2">🧲</span>}
+                        {section.title.includes('激发') && <span className="mr-2">💡</span>}
+                        {section.title.includes('引导') && <span className="mr-2">🚩</span>}
+                        {section.title.includes('行动') && <span className="mr-2">⚡</span>}
+                        {section.title}
+                      </div>
+                    )}
+                    <ul className="space-y-6">
+                      {section.items && section.items.map((item, i) => (
+                        <li key={i}>
+                          <div className="font-bold text-lg mb-1 flex items-center">
+                            <span className="inline-block px-2 py-1 rounded bg-gradient-to-r from-yellow-400 to-orange-400 text-white mr-2 text-base">
+                              {item.label}
+                            </span>
+                          </div>
+                          <div className="text-gray-300 text-base ml-1">{item.value}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ))}
-              </ul>
-            </div>
-          ))}
+              </div>
+            ));
+          })()}
         </div>
         {/* 标签+二维码+原文信息整合区 */}
         {(tags && tags.length > 0) && (
-          <div className="card col-span-full bg-[#18181b] shadow-lg flex flex-row items-center py-4 px-6">
-            {/* 左侧二维码及提示 */}
-            <div className="flex flex-col items-center mr-6 min-w-[80px]">
-              {meta && meta.url && (
-                <a href={meta.url.startsWith('http') ? meta.url : `https://${meta.url}`} target="_blank" rel="noopener noreferrer">
-                  <QRCodeCanvas value={meta.url.startsWith('http') ? meta.url : `https://${meta.url}`} size={80} />
-                </a>
-              )}
-              {(!meta || !meta.url) && (
-                <QRCodeCanvas value={meta && meta.title ? meta.title : '扫码体验'} size={80} />
-              )}
-              <div className="mt-2 text-xs text-gray-400 whitespace-nowrap">
-                {meta && meta.url ? '扫码阅读原文' : '扫码体验'}
+          <div className="px-6">
+            <div className="card col-span-full bg-[#18181b] shadow-lg flex flex-row items-center py-4 px-6" style={{ width: '100%', minWidth: 0 }}>
+              {/* 左侧二维码及提示 */}
+              <div className="flex flex-col items-center" style={{ minWidth: 100, marginRight: 32 }}>
+                {meta && meta.url && (
+                  <a href={meta.url.startsWith('http') ? meta.url : `https://${meta.url}`} target="_blank" rel="noopener noreferrer">
+                    <QRCodeCanvas value={meta.url.startsWith('http') ? meta.url : `https://${meta.url}`} size={100} />
+                  </a>
+                )}
+                {(!meta || !meta.url) && (
+                  <QRCodeCanvas value={meta && meta.title ? meta.title : '扫码体验'} size={100} />
+                )}
+                <div style={{ marginTop: 12, fontSize: 14, color: '#aaa', whiteSpace: 'nowrap' }}>
+                  {meta && meta.url ? '扫码阅读原文' : '扫码体验'}
+                </div>
               </div>
-            </div>
-            {/* 右侧内容 */}
-            <div className="flex-1 flex flex-col min-w-0">
-              <div className="text-xl font-bold text-white mb-2 truncate">{meta && meta.title ? meta.title : '原文标题'}</div>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {tags.map((tag) => (
-                  <span key={tag} className="tag bg-gradient-to-r from-yellow-100 to-orange-200 text-yellow-700 border-0">{tag}</span>
-                ))}
+              {/* 右侧内容 */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 12, lineHeight: '32px' }}>{meta && meta.title ? meta.title : '原文标题'}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+                  {tags.map((tag) => (
+                    <span key={tag} className="tag bg-gradient-to-r from-yellow-100 to-orange-200 text-yellow-700 border-0" style={{ fontSize: 16 }}>{tag}</span>
+                  ))}
+                </div>
+                {meta && meta.author && (
+                  <div style={{ fontSize: 15, color: '#aaa' }}>作者：{meta.author}</div>
+                )}
               </div>
-              {meta && meta.author && (
-                <div className="text-xs text-gray-400">作者：{meta.author}</div>
-              )}
             </div>
           </div>
         )}

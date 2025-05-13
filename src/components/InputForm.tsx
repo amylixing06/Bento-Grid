@@ -3,17 +3,18 @@
 import { useState } from 'react';
 
 interface InputFormProps {
-  onSubmit: (text: string, isUrl: boolean) => void;
-  isLoading: boolean;
+  onSubmit: (text: string, isUrl: boolean) => Promise<void>;
   placeholder?: string;
   hideUrlOption?: boolean;
+  debugInfo?: string | null;
 }
 
-export default function InputForm({ onSubmit, isLoading, placeholder = "输入文章内容...", hideUrlOption = false }: InputFormProps) {
+export default function InputForm({ onSubmit, placeholder = "输入文章内容...", hideUrlOption = false, debugInfo }: InputFormProps) {
   const [text, setText] = useState('');
   const [isUrl, setIsUrl] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string | null>(null);
+  const [innerDebugInfo, setInnerDebugInfo] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const validateUrl = (url: string) => {
     try {
@@ -27,36 +28,24 @@ export default function InputForm({ onSubmit, isLoading, placeholder = "输入�
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setDebugInfo(null);
+    setInnerDebugInfo(null);
+    setIsLoading(true);
 
     if (isUrl && !validateUrl(text)) {
       setError('请输入有效的 URL');
+      setIsLoading(false);
       return;
     }
 
     try {
-      setDebugInfo('正在发送请求...');
-      const response = await fetch('/api/process', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: text, isUrl }),
-      });
-
-      setDebugInfo(`响应状态: ${response.status}`);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '请求失败');
-      }
-
-      const data = await response.json();
-      setDebugInfo('请求成功，正在处理数据...');
-      onSubmit(text, isUrl);
+      setInnerDebugInfo('正在发送请求...');
+      await onSubmit(text, isUrl);
+      setInnerDebugInfo('请求成功，正在处理数据...');
     } catch (err) {
       setError(err instanceof Error ? err.message : '处理内容时出错');
-      setDebugInfo(`错误详情: ${err instanceof Error ? err.message : '未知错误'}`);
+      setInnerDebugInfo(`错误详情: ${err instanceof Error ? err.message : '未知错误'}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -96,8 +85,8 @@ export default function InputForm({ onSubmit, isLoading, placeholder = "输入�
           <p className="text-sm text-red-600 mt-2">{error}</p>
         )}
 
-        {debugInfo && (
-          <p className="text-sm text-gray-500 mt-2">{debugInfo}</p>
+        {(debugInfo || innerDebugInfo) && (
+          <p className="text-sm text-gray-500 mt-2">{debugInfo || innerDebugInfo}</p>
         )}
       </div>
 
@@ -112,7 +101,7 @@ export default function InputForm({ onSubmit, isLoading, placeholder = "输入�
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            处理中...
+            AI处理中
           </div>
         ) : (
           '创造新视力'

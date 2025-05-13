@@ -4,8 +4,8 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Bento Grid 生成器',
-  description: '将您的文章或链接转换为精美的 Bento Grid 布局',
+  title: '新视力',
+  description: '将文章或链接一键生成结构化Bento Grid卡片，支持微信文章，极致美观导出图片',
 };
 
 export default function RootLayout({
