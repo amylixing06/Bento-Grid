@@ -77,11 +77,16 @@ export default function Home() {
           {analyzedContent && (
             <div className="card">
               <BentoGrid 
-                summary={analyzedContent.summary}
                 tags={analyzedContent.tags}
                 author={analyzedContent.author}
                 rawContent={analyzedContent.rawContent}
-                sections={analyzedContent.sections}
+                sections={Array.isArray(analyzedContent.sections)
+                  ? analyzedContent.sections.map((item) =>
+                      typeof item === 'string'
+                        ? { title: item, items: [] }
+                        : item
+                    )
+                  : []}
               />
             </div>
           )}
