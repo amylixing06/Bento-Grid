@@ -61,15 +61,15 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold gradient-text mb-4">
-              Bento Grid 生成器
+              新视力
             </h1>
             <p className="text-gray-600 text-lg">
-              将您的文章或链接转换为精美的 Bento Grid 布局
+              遇见惊喜，创造新视力
             </p>
           </div>
 
           <div className="card mb-8">
-            <InputForm onSubmit={handleSubmit} isLoading={isLoading} />
+            <InputForm onSubmit={handleSubmit} isLoading={isLoading} placeholder="粘贴链接或输入内容..." hideUrlOption />
           </div>
 
           {error && (
@@ -111,7 +111,7 @@ export default function Home() {
                           // 导出后移除桌面端样式
                           bentoRef.current && bentoRef.current.classList.remove(EXPORT_DESKTOP_CLASS);
                           const link = document.createElement('a');
-                          link.download = 'bento-grid.png';
+                          link.download = '新视力.png';
                           link.href = dataUrl;
                           link.click();
                         }).catch(() => {

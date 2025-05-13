@@ -15,6 +15,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=900, initial-scale=1, maximum-scale=1, user-scalable=no" />
+      </head>
       <body className={inter.className}>{children}</body>
     </html>
   );

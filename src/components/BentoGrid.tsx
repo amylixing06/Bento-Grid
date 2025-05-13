@@ -112,7 +112,7 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
 
   return (
     <>
-      <div ref={gridRef} className="space-y-4 min-h-screen bg-gradient-to-br from-[#232526] to-[#414345] p-4">
+      <div ref={gridRef} className="mx-auto space-y-4 min-h-screen bg-gradient-to-br from-[#232526] to-[#414345] p-4" style={{ width: 900, minWidth: 900, maxWidth: 900 }}>
         {/* 主标题卡片（始终顶部） */}
         {(title || subtitle) && (
           <div className="card col-span-full py-8 bg-[#18181b] shadow-xl flex flex-col items-center mb-4">
@@ -133,13 +133,10 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
         )}
         {/* 分区卡片（AIDA横排，主点大副点小，主点加色块/icon） */}
         <div
-          className={`grid gap-6 p-6 rounded-2xl justify-items-center ${sections.length === 1 ? 'grid-cols-1' : ''}`}
-          style={sections.length === 1
-            ? {}
-            : { gridTemplateColumns: `repeat(auto-fit, minmax(260px, 1fr))`, margin: '0 auto' }}
+          className="grid gap-6 p-6 rounded-2xl justify-items-center grid-cols-3"
         >
           {sections && sections.length > 0 && sections.map((section, idx) => (
-            <div className="card py-6 bg-[#18181b] shadow-lg flex flex-col" key={idx} style={sections.length === 1 ? { width: '100%' } : { maxWidth: 340, width: '100%' }}>
+            <div className="card py-6 bg-[#18181b] shadow-lg flex flex-col" key={idx} style={{ maxWidth: 340, width: '100%' }}>
               {/* 分区标题 */}
               <div className="text-2xl font-bold text-white mb-6 flex items-center">
                 {/* 可加icon：AIDA四步可用不同icon，示例用emoji */}

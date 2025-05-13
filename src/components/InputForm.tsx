@@ -5,9 +5,11 @@ import { useState } from 'react';
 interface InputFormProps {
   onSubmit: (text: string, isUrl: boolean) => void;
   isLoading: boolean;
+  placeholder?: string;
+  hideUrlOption?: boolean;
 }
 
-export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
+export default function InputForm({ onSubmit, isLoading, placeholder = "输入文章内容...", hideUrlOption = false }: InputFormProps) {
   const [text, setText] = useState('');
   const [isUrl, setIsUrl] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,29 +63,31 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <label className="text-lg font-medium text-gray-700">
-            输入内容
-          </label>
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="urlMode"
-              checked={isUrl}
-              onChange={(e) => setIsUrl(e.target.checked)}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-            />
-            <label htmlFor="urlMode" className="text-sm text-gray-600">
-              输入 URL
+        {!hideUrlOption && (
+          <div className="flex items-center justify-between">
+            <label className="text-lg font-medium text-gray-700">
+              输入内容
             </label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="urlMode"
+                checked={isUrl}
+                onChange={(e) => setIsUrl(e.target.checked)}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              />
+              <label htmlFor="urlMode" className="text-sm text-gray-600">
+                输入 URL
+              </label>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="relative">
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={isUrl ? "输入文章 URL..." : "输入文章内容..."}
+            placeholder={placeholder}
             className="input-field h-32 resize-none"
           />
         </div>
@@ -111,7 +115,7 @@ export default function InputForm({ onSubmit, isLoading }: InputFormProps) {
             处理中...
           </div>
         ) : (
-          '生成 Bento Grid'
+          '创造新视力'
         )}
       </button>
     </form>
