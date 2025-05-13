@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, forwardRef, useImperativeHandle } from 'react';
 import { toPng } from 'html-to-image';
 import { QRCodeCanvas } from 'qrcode.react';
 import { FaUserFriends, FaChartLine, FaCogs, FaCheckCircle, FaClock, FaTags, FaChartPie, FaTrophy } from 'react-icons/fa';
@@ -79,7 +79,7 @@ function getHighlightClass(label: string, value: string) {
   return 'text-yellow-400';
 }
 
-export default function BentoGrid({ 
+const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid({ 
   title,
   subtitle,
   coreNumbers = [],
@@ -89,8 +89,9 @@ export default function BentoGrid({
   author,
   rawContent,
   meta
-}: BentoGridProps) {
+}, ref) {
   const gridRef = useRef<HTMLDivElement>(null);
+  useImperativeHandle(ref, () => gridRef.current as HTMLDivElement);
 
   const handleDownload = async () => {
     if (gridRef.current) {
@@ -110,91 +111,100 @@ export default function BentoGrid({
   };
 
   return (
-    <div className="space-y-6 min-h-screen bg-gradient-to-br from-[#232526] to-[#414345] p-6">
-      {/* 主标题卡片（始终顶部） */}
-      {(title || subtitle) && (
-        <div className="card col-span-full py-8 bg-[#18181b] shadow-xl flex flex-col items-center mb-4">
-          {title && <h1 className="text-5xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-2 text-center">{title}</h1>}
-          {subtitle && <div className="text-lg text-gray-300 mb-2 text-center">{subtitle}</div>}
-        </div>
-      )}
-      {/* 大数字卡片 */}
-      {coreNumbers.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {coreNumbers.map((num, idx) => (
-            <div key={idx} className="card bg-[#18181b] shadow-lg flex flex-col items-center py-8">
-              <div className="text-5xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-2">{num.number}</div>
-              <div className="text-base text-gray-300">{num.desc}</div>
-            </div>
-          ))}
-        </div>
-      )}
-      {/* 分区卡片 */}
-      <div
-        ref={gridRef}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-10 rounded-2xl"
-      >
-        {sections && sections.length > 0 && sections.map((section, idx) => (
-          <div className="card py-6 bg-[#18181b] shadow-lg" key={idx}>
-            {/* 分区标题 */}
-            <div className="text-2xl font-bold text-white mb-6">{section.title}</div>
-            <ul className="space-y-6">
-              {section.items && section.items.map((item, i) => (
-                <li key={i}>
-                  {/* label 单独一行高亮，value 下方 */}
-                  <div className="font-bold text-yellow-400 text-lg mb-1">{item.label}</div>
-                  {isHighlightValue(item.value) ? (
-                    <div className={`text-2xl font-extrabold inline-block px-3 py-1 rounded-lg ${getHighlightClass(item.label, item.value)}`}>{item.value}</div>
-                  ) : (
-                    <div className="text-gray-300 text-base">{item.value}</div>
-                  )}
-                  {renderProgressBar(item.value)}
-                </li>
-              ))}
-            </ul>
+    <>
+      <div ref={gridRef} className="space-y-4 min-h-screen bg-gradient-to-br from-[#232526] to-[#414345] p-4">
+        {/* 主标题卡片（始终顶部） */}
+        {(title || subtitle) && (
+          <div className="card col-span-full py-8 bg-[#18181b] shadow-xl flex flex-col items-center mb-4">
+            {title && <h1 className="text-5xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-2 text-center tracking-wide">{title}</h1>}
+            {subtitle && <div className="text-lg text-gray-400 mb-2 text-center font-medium tracking-wide">{subtitle}</div>}
           </div>
-        ))}
-      </div>
-      {/* 标签区 */}
-      {tags && tags.length > 0 && (
-        <div className="card col-span-full bg-[#18181b] shadow-lg flex flex-wrap gap-2 justify-center py-4">
-          {tags.map((tag) => (
-            <span key={tag} className="tag bg-gradient-to-r from-yellow-100 to-orange-200 text-yellow-700 border-0">{tag}</span>
-          ))}
-        </div>
-      )}
-      {/* 行动号召/结论区 */}
-      {cta && (
-        <div className="card col-span-full bg-[#18181b] shadow-lg flex flex-col items-center py-6">
-          <span className="text-lg font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">{cta}</span>
-        </div>
-      )}
-      {/* 下载为图片按钮 */}
-      <div className="flex justify-end">
-        <button
-          onClick={handleDownload}
-          className="btn-primary"
+        )}
+        {/* 大数字卡片 */}
+        {coreNumbers.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {coreNumbers.map((num, idx) => (
+              <div key={idx} className="card bg-[#18181b] shadow-lg flex flex-col items-center py-8">
+                <div className="text-5xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-2">{num.number}</div>
+                <div className="text-base text-gray-300">{num.desc}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        {/* 分区卡片（AIDA横排，主点大副点小，主点加色块/icon） */}
+        <div
+          className={`grid gap-6 p-6 rounded-2xl justify-items-center ${sections.length === 1 ? 'grid-cols-1' : ''}`}
+          style={sections.length === 1
+            ? {}
+            : { gridTemplateColumns: `repeat(auto-fit, minmax(260px, 1fr))`, margin: '0 auto' }}
         >
-          下载为图片
-        </button>
-      </div>
-      {/* meta 信息底部小字展示和二维码（始终底部单独卡片） */}
-      {(meta && (meta.title || meta.author || meta.platform || meta.date || meta.url)) && (
-        <div className="card col-span-full bg-[#18181b] shadow-lg flex flex-col items-center text-xs text-gray-500 py-4 mt-4">
-          <div>
-            {meta.title ? <span>《{meta.title}》</span> : null}
-            {meta.author ? <span>　作者：{meta.author}</span> : null}
-            {meta.platform ? <span>　平台：{meta.platform}</span> : null}
-            {meta.date ? <span>　日期：{meta.date}</span> : null}
-          </div>
-          {meta.url ? (
-            <div className="flex items-center space-x-2 mt-2">
-              <QRCodeCanvas value={meta.url} size={48} />
-              <span>扫码阅读原文</span>
+          {sections && sections.length > 0 && sections.map((section, idx) => (
+            <div className="card py-6 bg-[#18181b] shadow-lg flex flex-col" key={idx} style={sections.length === 1 ? { width: '100%' } : { maxWidth: 340, width: '100%' }}>
+              {/* 分区标题 */}
+              <div className="text-2xl font-bold text-white mb-6 flex items-center">
+                {/* 可加icon：AIDA四步可用不同icon，示例用emoji */}
+                {section.title.includes('吸引') && <span className="mr-2">🧲</span>}
+                {section.title.includes('激发') && <span className="mr-2">💡</span>}
+                {section.title.includes('引导') && <span className="mr-2">🚩</span>}
+                {section.title.includes('行动') && <span className="mr-2">⚡</span>}
+                {section.title}
+              </div>
+              <ul className="space-y-6">
+                {section.items && section.items.map((item, i) => (
+                  <li key={i}>
+                    {/* 主点大色块，副点小灰色 */}
+                    <div className="font-bold text-lg mb-1 flex items-center">
+                      <span className="inline-block px-2 py-1 rounded bg-gradient-to-r from-yellow-400 to-orange-400 text-white mr-2 text-base">
+                        {item.label}
+                      </span>
+                    </div>
+                    <div className="text-gray-300 text-base ml-1">{item.value}</div>
+                  </li>
+                ))}
+              </ul>
             </div>
-          ) : null}
+          ))}
         </div>
-      )}
-    </div>
+        {/* 标签+二维码+原文信息整合区 */}
+        {(tags && tags.length > 0) && (
+          <div className="card col-span-full bg-[#18181b] shadow-lg flex flex-row items-center py-4 px-6">
+            {/* 左侧二维码及提示 */}
+            <div className="flex flex-col items-center mr-6 min-w-[80px]">
+              {meta && meta.url && (
+                <a href={meta.url.startsWith('http') ? meta.url : `https://${meta.url}`} target="_blank" rel="noopener noreferrer">
+                  <QRCodeCanvas value={meta.url.startsWith('http') ? meta.url : `https://${meta.url}`} size={80} />
+                </a>
+              )}
+              {(!meta || !meta.url) && (
+                <QRCodeCanvas value={meta && meta.title ? meta.title : '扫码体验'} size={80} />
+              )}
+              <div className="mt-2 text-xs text-gray-400 whitespace-nowrap">
+                {meta && meta.url ? '扫码阅读原文' : '扫码体验'}
+              </div>
+            </div>
+            {/* 右侧内容 */}
+            <div className="flex-1 flex flex-col min-w-0">
+              <div className="text-xl font-bold text-white mb-2 truncate">{meta && meta.title ? meta.title : '原文标题'}</div>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {tags.map((tag) => (
+                  <span key={tag} className="tag bg-gradient-to-r from-yellow-100 to-orange-200 text-yellow-700 border-0">{tag}</span>
+                ))}
+              </div>
+              {meta && meta.author && (
+                <div className="text-xs text-gray-400">作者：{meta.author}</div>
+              )}
+            </div>
+          </div>
+        )}
+        {/* 行动号召/结论区 */}
+        {cta && (
+          <div className="card col-span-full bg-[#18181b] shadow-lg flex flex-col items-center py-6">
+            <span className="text-lg font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">{cta}</span>
+          </div>
+        )}
+      </div>
+    </>
   );
-} 
+});
+
+export default BentoGrid; 

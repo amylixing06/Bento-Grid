@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import InputForm from '@/components/InputForm';
 import BentoGrid from '@/components/BentoGrid';
 import type { Section } from '@/components/BentoGrid';
@@ -23,6 +23,7 @@ export default function Home() {
   const [analyzedContent, setAnalyzedContent] = useState<AnalyzedContent | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const bentoRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = async (text: string, isUrl: boolean) => {
     setIsLoading(true);
@@ -76,32 +77,32 @@ export default function Home() {
 
           {analyzedContent && (
             <div className="card">
-              <div className="flex flex-col items-end">
-                <BentoGrid 
-                  title={analyzedContent.title}
-                  subtitle={analyzedContent.summary}
-                  tags={analyzedContent.tags}
-                  author={analyzedContent.author}
-                  rawContent={analyzedContent.rawContent}
-                  sections={Array.isArray(analyzedContent.sections)
-                    ? analyzedContent.sections.map((item) =>
-                        typeof item === 'string'
-                          ? { title: item, items: [] }
-                          : item
-                      )
-                    : []}
-                  meta={{
-                    title: analyzedContent.title,
-                    author: analyzedContent.author,
-                    url: content && content.startsWith('http') ? content : undefined
-                  }}
-                />
+              <BentoGrid 
+                ref={bentoRef}
+                title={analyzedContent.title}
+                subtitle={analyzedContent.summary}
+                tags={analyzedContent.tags}
+                author={analyzedContent.author}
+                rawContent={analyzedContent.rawContent}
+                sections={Array.isArray(analyzedContent.sections)
+                  ? analyzedContent.sections.map((item) =>
+                      typeof item === 'string'
+                        ? { title: item, items: [] }
+                        : item
+                    )
+                  : []}
+                meta={{
+                  title: analyzedContent.title,
+                  author: analyzedContent.author,
+                  url: content && content.startsWith('http') ? content : 'www.ainew.cc'
+                }}
+              />
+              <div className="flex justify-end">
                 <button
                   onClick={() => {
-                    const grid = document.querySelector('.space-y-6');
-                    if (grid) {
+                    if (bentoRef.current) {
                       import('html-to-image').then(({ toPng }) => {
-                        toPng(grid as HTMLElement, { quality: 1.0, pixelRatio: 2 }).then((dataUrl) => {
+                        toPng(bentoRef.current as HTMLElement, { quality: 1.0, pixelRatio: 2 }).then((dataUrl) => {
                           const link = document.createElement('a');
                           link.download = 'bento-grid.png';
                           link.href = dataUrl;
