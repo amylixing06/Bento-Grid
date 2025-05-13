@@ -76,18 +76,45 @@ export default function Home() {
 
           {analyzedContent && (
             <div className="card">
-              <BentoGrid 
-                tags={analyzedContent.tags}
-                author={analyzedContent.author}
-                rawContent={analyzedContent.rawContent}
-                sections={Array.isArray(analyzedContent.sections)
-                  ? analyzedContent.sections.map((item) =>
-                      typeof item === 'string'
-                        ? { title: item, items: [] }
-                        : item
-                    )
-                  : []}
-              />
+              <div className="flex flex-col items-end">
+                <BentoGrid 
+                  title={analyzedContent.title}
+                  subtitle={analyzedContent.summary}
+                  tags={analyzedContent.tags}
+                  author={analyzedContent.author}
+                  rawContent={analyzedContent.rawContent}
+                  sections={Array.isArray(analyzedContent.sections)
+                    ? analyzedContent.sections.map((item) =>
+                        typeof item === 'string'
+                          ? { title: item, items: [] }
+                          : item
+                      )
+                    : []}
+                  meta={{
+                    title: analyzedContent.title,
+                    author: analyzedContent.author,
+                    url: content && content.startsWith('http') ? content : undefined
+                  }}
+                />
+                <button
+                  onClick={() => {
+                    const grid = document.querySelector('.space-y-6');
+                    if (grid) {
+                      import('html-to-image').then(({ toPng }) => {
+                        toPng(grid as HTMLElement, { quality: 1.0, pixelRatio: 2 }).then((dataUrl) => {
+                          const link = document.createElement('a');
+                          link.download = 'bento-grid.png';
+                          link.href = dataUrl;
+                          link.click();
+                        });
+                      });
+                    }
+                  }}
+                  className="btn-primary mt-4"
+                >
+                  下载为图片
+                </button>
+              </div>
             </div>
           )}
         </div>
