@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, forwardRef, useImperativeHandle } from 'react';
+import { useRef, forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import { toPng } from 'html-to-image';
 import { QRCodeCanvas } from 'qrcode.react';
 import { FaUserFriends, FaChartLine, FaCogs, FaCheckCircle, FaClock, FaTags, FaChartPie, FaTrophy } from 'react-icons/fa';
@@ -91,6 +91,27 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
   meta
 }, ref) {
   const gridRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileView = window.innerWidth <= 820;
+      setIsMobile(isMobileView);
+      if (isMobileView) {
+        const containerWidth = window.innerWidth - 8;
+        const scale = containerWidth / 820;
+        setScale(scale);
+      } else {
+        setScale(1);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useImperativeHandle(ref, () => gridRef.current as HTMLDivElement);
 
   const handleDownload = async () => {
@@ -122,6 +143,8 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
         background: 'linear-gradient(135deg, #232526 0%, #414345 100%)',
         padding: 24,
         position: 'relative',
+        transform: isMobile ? `scale(${scale})` : 'none',
+        transformOrigin: 'top center',
       }}>
         {/* 主标题卡片（始终顶部） */}
         <div style={{ paddingLeft: 24, paddingRight: 24 }}>

@@ -105,9 +105,7 @@ export default function Home() {
                   style={
                     isMobile
                       ? {
-                          width: '100vw',
-                          maxWidth: 820,
-                          minWidth: 0,
+                          width: 'calc(100vw - 8px)',
                           margin: '0 auto',
                           boxSizing: 'border-box',
                           display: 'block',
@@ -143,7 +141,15 @@ export default function Home() {
                     }}
                   />
                 </div>
-                <div className="flex gap-2 flex-wrap justify-end mt-4" style={{ maxWidth: 820, width: '100%', margin: '0 auto', alignSelf: 'center' }}>
+                <div 
+                  className="flex gap-2 flex-wrap justify-end mt-4" 
+                  style={{ 
+                    maxWidth: isMobile ? 'calc(100vw - 8px)' : 820,
+                    width: '100%',
+                    margin: '0 auto',
+                    alignSelf: 'center'
+                  }}
+                >
                   <button
                     onClick={async () => {
                       try {
