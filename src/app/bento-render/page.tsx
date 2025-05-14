@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import BentoGrid from '@/components/BentoGrid';
 import type { Section } from '@/components/BentoGrid';
+import { toPng } from 'html-to-image';
 
 interface AnalyzedContent {
   title: string;
@@ -78,6 +79,29 @@ function BentoContent() {
       readyElement.id = 'screenshot-ready';
       readyElement.style.display = 'none';
       document.body.appendChild(readyElement);
+
+      // 自动下载高清图片
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('download') === '1') {
+        setTimeout(async () => {
+          const bentoEl = document.getElementById('bento-container');
+          if (bentoEl) {
+            try {
+              const dataUrl = await toPng(bentoEl, {
+                quality: 1.0,
+                pixelRatio: 2,
+                backgroundColor: '#111827',
+              });
+              const link = document.createElement('a');
+              link.download = 'bento-grid.png';
+              link.href = dataUrl;
+              link.click();
+            } catch (e) {
+              alert('图片导出失败，请手动截图');
+            }
+          }
+        }, 600); // 等待页面渲染完成
+      }
     }
   }, [isLoading, analyzedContent]);
 
