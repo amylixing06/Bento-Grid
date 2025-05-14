@@ -107,60 +107,90 @@ export default function Home() {
                 }}
               />
               <div className="flex flex-col items-end">
-                <button
-                  onClick={async () => {
-                    try {
+                <div className="flex gap-2">
+                  <button
+                    onClick={async () => {
+                      try {
+                        if (!analyzedContent) {
+                          alert('没有可用的内容数据');
+                          return;
+                        }
+                        
+                        // 使用localStorage而不是sessionStorage，这样在新窗口也能访问
+                        const bentoDataId = `bento-data-${Date.now()}`;
+                        localStorage.setItem(bentoDataId, JSON.stringify(analyzedContent));
+                        
+                        // 构建专门用于截图的页面URL，只传递数据ID
+                        const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
+                        
+                        // 调用截图服务
+                        const response = await fetch('https://xianwenai.com/screenshot', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            url: renderUrl,
+                            width: 820,
+                            height: 1200,
+                            selector: '#bento-container',
+                            fullPage: false,
+                            waitForSelector: '#bento-container',
+                            delay: 1000 // 额外等待1秒确保渲染完成
+                          })
+                        });
+                        
+                        // 使用完毕后清理localStorage
+                        setTimeout(() => {
+                          localStorage.removeItem(bentoDataId);
+                        }, 30000); // 30秒后清理
+                        
+                        if (!response.ok) {
+                          alert('截图服务异常');
+                          return;
+                        }
+                        
+                        const blob = await response.blob();
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = 'bento-screenshot.png';
+                        link.click();
+                      } catch (e) {
+                        console.error('截图错误:', e);
+                        alert('截图服务异常');
+                      }
+                    }}
+                    className="btn-primary mt-4"
+                  >
+                    下载为图片
+                  </button>
+                  
+                  <button
+                    onClick={() => {
                       if (!analyzedContent) {
                         alert('没有可用的内容数据');
                         return;
                       }
                       
-                      // 使用sessionStorage存储数据，避免URL过长
+                      // 使用localStorage存储数据
                       const bentoDataId = `bento-data-${Date.now()}`;
-                      sessionStorage.setItem(bentoDataId, JSON.stringify(analyzedContent));
+                      localStorage.setItem(bentoDataId, JSON.stringify(analyzedContent));
                       
-                      // 构建专门用于截图的页面URL，只传递数据ID
+                      // 构建专门用于截图的页面URL
                       const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
                       
-                      // 调用截图服务
-                      const response = await fetch('https://xianwenai.com/screenshot', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          url: renderUrl,
-                          width: 820,
-                          height: 1200,
-                          selector: '#bento-container',
-                          fullPage: false,
-                          waitForSelector: '#bento-container',
-                          delay: 1000 // 额外等待1秒确保渲染完成
-                        })
-                      });
-                      
-                      // 使用完毕后清理sessionStorage
+                      // 设置计时器在30秒后清理数据
                       setTimeout(() => {
-                        sessionStorage.removeItem(bentoDataId);
-                      }, 10000); // 10秒后清理
+                        localStorage.removeItem(bentoDataId);
+                      }, 30000); // 30秒后清理
                       
-                      if (!response.ok) {
-                        alert('截图服务异常');
-                        return;
-                      }
-                      
-                      const blob = await response.blob();
-                      const link = document.createElement('a');
-                      link.href = URL.createObjectURL(blob);
-                      link.download = 'bento-screenshot.png';
-                      link.click();
-                    } catch (e) {
-                      console.error('截图错误:', e);
-                      alert('截图服务异常');
-                    }
-                  }}
-                  className="btn-primary mt-4"
-                >
-                  下载为图片
-                </button>
+                      // 在新窗口打开预览页面
+                      window.open(renderUrl, '_blank');
+                    }}
+                    className="btn-secondary mt-4"
+                  >
+                    预览页面
+                  </button>
+                </div>
+                
                 <p className="text-gray-500 text-xs mt-2">
                   使用专用页面截图，确保更高质量的图片效果
                 </p>

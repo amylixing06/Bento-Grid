@@ -34,14 +34,14 @@ function BentoContent() {
     
     if (dataId) {
       try {
-        // 从sessionStorage获取数据
-        const storedData = sessionStorage.getItem(dataId);
+        // 从localStorage获取数据
+        const storedData = localStorage.getItem(dataId);
         
         if (storedData) {
           const parsedData = JSON.parse(storedData);
           setAnalyzedContent(parsedData);
         } else {
-          setError('无法找到数据，可能会话已过期');
+          setError('无法找到数据，可能已过期或已被清理');
         }
       } catch (error) {
         console.error('解析数据失败:', error);
