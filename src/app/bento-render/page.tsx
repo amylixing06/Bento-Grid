@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import BentoGrid from '@/components/BentoGrid';
 import type { Section } from '@/components/BentoGrid';
@@ -21,7 +21,8 @@ interface AnalyzedContent {
   };
 }
 
-export default function BentoRender() {
+// 分离出使用useSearchParams的组件
+function BentoContent() {
   const searchParams = useSearchParams();
   const [analyzedContent, setAnalyzedContent] = useState<AnalyzedContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,5 +110,23 @@ export default function BentoRender() {
         />
       </div>
     </div>
+  );
+}
+
+// 加载占位符组件
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="text-white">加载中...</div>
+    </div>
+  );
+}
+
+// 主页面组件，使用Suspense包装
+export default function BentoRender() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <BentoContent />
+    </Suspense>
   );
 } 
