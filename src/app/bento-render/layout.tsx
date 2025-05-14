@@ -13,7 +13,7 @@ export default function BentoRenderLayout({
 }) {
   return (
     <html lang="zh-CN">
-      <body>
+      <body className="bento-render-page bg-gray-900">
         {children}
       </body>
     </html>

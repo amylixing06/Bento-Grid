@@ -107,7 +107,7 @@ export default function Home() {
                 }}
               />
               <div className="flex flex-col items-end">
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap justify-end">
                   <button
                     onClick={async () => {
                       try {
@@ -116,11 +116,23 @@ export default function Home() {
                           return;
                         }
                         
-                        // 使用localStorage而不是sessionStorage，这样在新窗口也能访问
-                        const bentoDataId = `bento-data-${Date.now()}`;
-                        localStorage.setItem(bentoDataId, JSON.stringify(analyzedContent));
+                        // 生成固定ID
+                        const bentoDataId = 'current-bento-data';
                         
-                        // 构建专门用于截图的页面URL，只传递数据ID
+                        // 确保使用JSON.stringify处理整个对象
+                        const jsonData = JSON.stringify(analyzedContent, (key, value) => {
+                          // 这里确保所有函数和特殊对象被正确序列化
+                          if (typeof value === 'function') {
+                            return undefined; // 忽略函数属性
+                          }
+                          return value;
+                        });
+                        
+                        // 使用localStorage存储数据
+                        localStorage.setItem(bentoDataId, jsonData);
+                        console.log('数据已保存到localStorage, ID:', bentoDataId, '数据长度:', jsonData.length);
+                        
+                        // 构建专门用于截图的页面URL
                         const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
                         
                         // 调用截图服务
@@ -134,14 +146,9 @@ export default function Home() {
                             selector: '#bento-container',
                             fullPage: false,
                             waitForSelector: '#bento-container',
-                            delay: 1000 // 额外等待1秒确保渲染完成
+                            delay: 2000 // 增加等待时间到2秒
                           })
                         });
-                        
-                        // 使用完毕后清理localStorage
-                        setTimeout(() => {
-                          localStorage.removeItem(bentoDataId);
-                        }, 30000); // 30秒后清理
                         
                         if (!response.ok) {
                           alert('截图服务异常');
@@ -170,17 +177,24 @@ export default function Home() {
                         return;
                       }
                       
+                      // 使用固定ID
+                      const bentoDataId = 'current-bento-data';
+                      
+                      // 确保使用JSON.stringify处理整个对象
+                      const jsonData = JSON.stringify(analyzedContent, (key, value) => {
+                        // 这里确保所有函数和特殊对象被正确序列化
+                        if (typeof value === 'function') {
+                          return undefined; // 忽略函数属性
+                        }
+                        return value;
+                      });
+                      
                       // 使用localStorage存储数据
-                      const bentoDataId = `bento-data-${Date.now()}`;
-                      localStorage.setItem(bentoDataId, JSON.stringify(analyzedContent));
+                      localStorage.setItem(bentoDataId, jsonData);
+                      console.log('数据已保存到localStorage, ID:', bentoDataId, '数据长度:', jsonData.length);
                       
                       // 构建专门用于截图的页面URL
                       const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
-                      
-                      // 设置计时器在30秒后清理数据
-                      setTimeout(() => {
-                        localStorage.removeItem(bentoDataId);
-                      }, 30000); // 30秒后清理
                       
                       // 在新窗口打开预览页面
                       window.open(renderUrl, '_blank');

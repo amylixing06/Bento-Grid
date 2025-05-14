@@ -21,6 +21,15 @@ interface AnalyzedContent {
   };
 }
 
+// 加载占位符组件
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="text-white">加载中...</div>
+    </div>
+  );
+}
+
 // 分离出使用useSearchParams的组件
 function BentoContent() {
   const searchParams = useSearchParams();
@@ -29,34 +38,38 @@ function BentoContent() {
   const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
-    // 从URL参数中获取数据ID
-    const dataId = searchParams.get('id');
-    
-    if (dataId) {
-      try {
-        // 从localStorage获取数据
-        const storedData = localStorage.getItem(dataId);
-        
-        if (storedData) {
-          const parsedData = JSON.parse(storedData);
-          setAnalyzedContent(parsedData);
-        } else {
-          setError('无法找到数据，可能已过期或已被清理');
+    // 确保在客户端环境中运行
+    if (typeof window !== 'undefined') {
+      // 从URL参数中获取数据ID
+      const dataId = searchParams.get('id');
+      
+      if (dataId) {
+        try {
+          // 从localStorage获取数据
+          const storedData = localStorage.getItem(dataId);
+          
+          if (storedData) {
+            const parsedData = JSON.parse(storedData);
+            setAnalyzedContent(parsedData);
+          } else {
+            setError('无法找到数据，可能已过期或已被清理');
+            console.error('未找到数据ID:', dataId);
+          }
+        } catch (error) {
+          console.error('解析数据失败:', error);
+          setError('数据解析失败');
         }
-      } catch (error) {
-        console.error('解析数据失败:', error);
-        setError('数据解析失败');
+      } else {
+        setError('未提供数据ID参数');
       }
-    } else {
-      setError('未提供数据ID参数');
+      
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   }, [searchParams]);
   
   // 页面加载完成后通知父窗口
   useEffect(() => {
-    if (!isLoading && analyzedContent) {
+    if (!isLoading && analyzedContent && typeof window !== 'undefined') {
       // 向父窗口或截图服务发送渲染完成的消息
       window.parent.postMessage({ type: 'RENDER_COMPLETE' }, '*');
       
@@ -79,7 +92,10 @@ function BentoContent() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-white">{error}</div>
+        <div className="text-white text-center px-4">
+          <div className="mb-4 text-xl">{error}</div>
+          <p className="text-sm">请返回主页重新生成</p>
+        </div>
       </div>
     );
   }
@@ -93,8 +109,10 @@ function BentoContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-8">
-      <div id="bento-container" style={{ width: 820, margin: '0 auto' }}>
+    <div className="min-h-screen bg-gray-900 py-8 relative">
+      {/* 确保移动端背景一致 */}
+      <div className="absolute inset-0 bg-gray-900 z-0"></div>
+      <div id="bento-container" className="relative z-10" style={{ width: 820, maxWidth: '100%', margin: '0 auto' }}>
         <BentoGrid 
           title={analyzedContent.title}
           subtitle={analyzedContent.summary}
@@ -109,15 +127,6 @@ function BentoContent() {
           }}
         />
       </div>
-    </div>
-  );
-}
-
-// 加载占位符组件
-function LoadingFallback() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="text-white">加载中...</div>
     </div>
   );
 }
