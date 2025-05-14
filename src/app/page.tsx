@@ -100,41 +100,40 @@ export default function Home() {
             )}
 
             {analyzedContent && (
-              <>
-                <div className="card" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', display: 'flex', justifyContent: isMobile ? 'flex-start' : 'center' }}>
-                  <div
-                    style={{
-                      width: 820,
-                      minWidth: 820,
-                      maxWidth: 820,
-                      transform: isMobile ? 'scale(0.45)' : 'none',
-                      transformOrigin: 'top left',
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div
+                  style={{
+                    display: 'inline-block',
+                    width: 820,
+                    minWidth: 820,
+                    maxWidth: 820,
+                    transform: isMobile ? 'scale(0.45)' : 'none',
+                    transformOrigin: 'top left',
+                  }}
+                  ref={bentoRef}
+                  id="bento-container"
+                >
+                  <BentoGrid
+                    title={analyzedContent.title}
+                    subtitle={analyzedContent.summary}
+                    tags={analyzedContent.tags}
+                    author={analyzedContent.author}
+                    rawContent={analyzedContent.rawContent}
+                    sections={Array.isArray(analyzedContent.sections)
+                      ? analyzedContent.sections.map((item) =>
+                          typeof item === 'string'
+                            ? { title: item, items: [] }
+                            : item
+                        )
+                      : []}
+                    meta={{
+                      title: analyzedContent.title,
+                      author: analyzedContent.author,
+                      url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
                     }}
-                    ref={bentoRef}
-                    id="bento-container"
-                  >
-                    <BentoGrid
-                      title={analyzedContent.title}
-                      subtitle={analyzedContent.summary}
-                      tags={analyzedContent.tags}
-                      author={analyzedContent.author}
-                      rawContent={analyzedContent.rawContent}
-                      sections={Array.isArray(analyzedContent.sections)
-                        ? analyzedContent.sections.map((item) =>
-                            typeof item === 'string'
-                              ? { title: item, items: [] }
-                              : item
-                          )
-                        : []}
-                      meta={{
-                        title: analyzedContent.title,
-                        author: analyzedContent.author,
-                        url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
-                      }}
-                    />
-                  </div>
+                  />
                 </div>
-                <div className="flex gap-2 flex-wrap justify-end w-full mt-4" style={{ maxWidth: 900, margin: '0 auto' }}>
+                <div className="flex gap-2 flex-wrap justify-end w-full mt-4" style={{ maxWidth: 900 }}>
                   <button
                     onClick={async () => {
                       try {
@@ -192,7 +191,7 @@ export default function Home() {
                     预览图片
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
