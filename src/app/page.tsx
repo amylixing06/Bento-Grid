@@ -110,7 +110,7 @@ export default function Home() {
                 <button
                   onClick={async () => {
                     try {
-                      const response = await fetch('http://47.113.229.170/screenshot', {
+                      const response = await fetch('https://xianwenai.com/screenshot', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
