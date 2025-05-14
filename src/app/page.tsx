@@ -67,7 +67,7 @@ export default function Home() {
       const data = await response.json();
       setContent(text);
       setAnalyzedContent(data);
-      setDebugInfo('已完成，请查收');
+      setDebugInfo('已完成，下滑到低部可下载高清图片');
     } catch (err) {
       setError(err instanceof Error ? err.message : '处理内容时出错');
     } finally {
@@ -101,18 +101,7 @@ export default function Home() {
 
             {analyzedContent && (
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div
-                  style={{
-                    display: 'inline-block',
-                    width: 820,
-                    minWidth: 820,
-                    maxWidth: 820,
-                    transform: isMobile ? 'scale(0.45)' : 'none',
-                    transformOrigin: 'top left',
-                  }}
-                  ref={bentoRef}
-                  id="bento-container"
-                >
+                <div style={{ display: 'inline-block', width: 820, minWidth: 820, maxWidth: 820, transform: isMobile ? 'scale(0.45)' : 'none', transformOrigin: 'top left', verticalAlign: 'top' }} ref={bentoRef} id="bento-container">
                   <BentoGrid
                     title={analyzedContent.title}
                     subtitle={analyzedContent.summary}
@@ -133,7 +122,7 @@ export default function Home() {
                     }}
                   />
                 </div>
-                <div className="flex gap-2 flex-wrap justify-end w-full mt-4" style={{ maxWidth: 900 }}>
+                <div className="flex gap-2 flex-wrap justify-end mt-4" style={{ maxWidth: 820, width: '100%', margin: '0 auto', alignSelf: 'center' }}>
                   <button
                     onClick={async () => {
                       try {
@@ -186,7 +175,15 @@ export default function Home() {
                       const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
                       window.open(renderUrl, '_blank');
                     }}
-                    className="btn-secondary mt-4"
+                    className="mt-4"
+                    style={{
+                      background: '#e0e0e0',
+                      color: '#333',
+                      borderRadius: 16,
+                      fontWeight: 600,
+                      padding: '0.75rem 2.5rem',
+                      boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
+                    }}
                   >
                     预览图片
                   </button>
