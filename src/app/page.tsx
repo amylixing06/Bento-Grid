@@ -1,9 +1,13 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import InputForm from '@/components/InputForm';
 import BentoGrid from '@/components/BentoGrid';
 import type { Section } from '@/components/BentoGrid';
+import dynamic from 'next/dynamic';
+
+const Zoom = dynamic(() => import('react-medium-image-zoom'), { ssr: false });
+import 'react-medium-image-zoom/dist/styles.css';
 
 interface AnalyzedContent {
   title: string;
@@ -31,6 +35,15 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const bentoRef = useRef<HTMLDivElement>(null);
+  const [previewImg, setPreviewImg] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 700);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleSubmit = async (text: string, isUrl: boolean): Promise<void> => {
     setIsLoading(true);
@@ -86,135 +99,140 @@ export default function Home() {
             )}
 
             {analyzedContent && (
-              <div className="card" id="bento-container">
-                <BentoGrid 
-                  ref={bentoRef}
-                  title={analyzedContent.title}
-                  subtitle={analyzedContent.summary}
-                  tags={analyzedContent.tags}
-                  author={analyzedContent.author}
-                  rawContent={analyzedContent.rawContent}
-                  sections={Array.isArray(analyzedContent.sections)
-                    ? analyzedContent.sections.map((item) =>
-                        typeof item === 'string'
-                          ? { title: item, items: [] }
-                          : item
-                      )
-                    : []}
-                  meta={{
-                    title: analyzedContent.title,
-                    author: analyzedContent.author,
-                    url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
+              <div className="card" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', display: 'flex', justifyContent: isMobile ? 'flex-start' : 'center' }}>
+                <div
+                  style={{
+                    width: 820,
+                    minWidth: 820,
+                    maxWidth: 820,
+                    transform: isMobile ? 'scale(0.45)' : 'none',
+                    transformOrigin: 'top left',
                   }}
-                />
-                <div className="flex flex-col items-end">
-                  <div className="flex gap-2 flex-wrap justify-end">
-                    <button
-                      onClick={async () => {
-                        try {
-                          if (!analyzedContent) {
-                            alert('没有可用的内容数据');
-                            return;
-                          }
-
-                          // 直接使用html-to-image库在前端截图，不依赖外部服务
-                          if (bentoRef.current) {
-                            // 确保截图元素可见并样式正确
-                            console.log('开始截图...');
-                            const element = bentoRef.current;
-                            
-                            // 截图前先移除可能干扰的元素
-                            element.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
-                              (el as HTMLElement).style.display = 'none';
-                            });
-                            
-                            // 使用toPng函数进行截图
-                            try {
-                              // 导入toPng
-                              const { toPng } = await import('html-to-image');
-                              
-                              // 执行截图
-                              const dataUrl = await toPng(element, {
-                                quality: 1.0,
-                                pixelRatio: 2,
-                                skipFonts: false,
-                                cacheBust: true,
-                                backgroundColor: '#111827'
-                              });
-                              
-                              // 恢复元素样式
-                              element.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
-                                (el as HTMLElement).style.display = '';
-                              });
-                              
-                              // 创建下载链接
-                              const link = document.createElement('a');
-                              link.download = 'bento-grid.png';
-                              link.href = dataUrl;
-                              link.click();
-                              
-                              console.log('截图完成，已触发下载');
-                            } catch (imgError) {
-                              console.error('截图过程出错:', imgError);
-                              alert('生成图片失败，请稍后重试');
-                              
-                              // 恢复元素样式
-                              element.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
-                                (el as HTMLElement).style.display = '';
-                              });
-                            }
-                          } else {
-                            alert('内容元素未找到，无法截图');
-                          }
-                        } catch (e) {
-                          console.error('下载操作错误:', e);
-                          alert('下载图片失败，请稍后重试');
-                        }
-                      }}
-                      className="btn-primary mt-4"
-                    >
-                      下载为图片
-                    </button>
-                    
-                    <button
-                      onClick={() => {
+                  ref={bentoRef}
+                  id="bento-container"
+                >
+                  <BentoGrid
+                    title={analyzedContent.title}
+                    subtitle={analyzedContent.summary}
+                    tags={analyzedContent.tags}
+                    author={analyzedContent.author}
+                    rawContent={analyzedContent.rawContent}
+                    sections={Array.isArray(analyzedContent.sections)
+                      ? analyzedContent.sections.map((item) =>
+                          typeof item === 'string'
+                            ? { title: item, items: [] }
+                            : item
+                        )
+                      : []}
+                    meta={{
+                      title: analyzedContent.title,
+                      author: analyzedContent.author,
+                      url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
+                    }}
+                  />
+                </div>
+                <div className="flex gap-2 flex-wrap justify-end w-full mt-4">
+                  <button
+                    onClick={async () => {
+                      try {
                         if (!analyzedContent) {
                           alert('没有可用的内容数据');
                           return;
                         }
-                        
-                        // 使用localStorage存储数据
-                        const bentoDataId = 'current-bento-data';
-                        
-                        // 确保使用JSON.stringify处理整个对象
-                        const jsonData = JSON.stringify(analyzedContent, (key, value) => {
-                          // 这里确保所有函数和特殊对象被正确序列化
-                          if (typeof value === 'function') {
-                            return undefined; // 忽略函数属性
-                          }
-                          return value;
+                        if (bentoRef.current) {
+                          // 隐藏按钮
+                          bentoRef.current.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
+                            (el as HTMLElement).style.display = 'none';
+                          });
+                          const { toPng } = await import('html-to-image');
+                          const dataUrl = await toPng(bentoRef.current, {
+                            quality: 1.0,
+                            pixelRatio: 2,
+                            skipFonts: false,
+                            cacheBust: true,
+                            backgroundColor: '#111827'
+                          });
+                          // 恢复按钮
+                          bentoRef.current.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
+                            (el as HTMLElement).style.display = '';
+                          });
+                          // 下载
+                          const link = document.createElement('a');
+                          link.download = 'bento-grid.png';
+                          link.href = dataUrl;
+                          link.click();
+                        }
+                      } catch (e) {
+                        alert('下载图片失败，请稍后重试');
+                      }
+                    }}
+                    className="btn-primary mt-4"
+                  >
+                    下载高清图片
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!analyzedContent) {
+                        alert('没有可用的内容数据');
+                        return;
+                      }
+                      if (bentoRef.current) {
+                        // 隐藏按钮
+                        bentoRef.current.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
+                          (el as HTMLElement).style.display = 'none';
                         });
-                        
-                        // 使用localStorage存储数据
-                        localStorage.setItem(bentoDataId, jsonData);
-                        console.log('数据已保存到localStorage, ID:', bentoDataId, '数据长度:', jsonData.length);
-                        
-                        // 构建专门用于截图的页面URL
-                        const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
-                        
-                        // 在新窗口打开预览页面
-                        window.open(renderUrl, '_blank');
-                      }}
-                      className="btn-secondary mt-4"
-                    >
-                      预览页面
-                    </button>
-                  </div>
-                  
-                  <p className="text-gray-500 text-xs mt-2">
-                    使用专用页面截图，确保更高质量的图片效果
-                  </p>
+                        const { toPng } = await import('html-to-image');
+                        const dataUrl = await toPng(bentoRef.current, {
+                          quality: 1.0,
+                          pixelRatio: 2,
+                          skipFonts: false,
+                          cacheBust: true,
+                          backgroundColor: '#111827'
+                        });
+                        // 恢复按钮
+                        bentoRef.current.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
+                          (el as HTMLElement).style.display = '';
+                        });
+                        setPreviewImg(dataUrl);
+                      }
+                    }}
+                    className="btn-secondary mt-4"
+                  >
+                    预览图片
+                  </button>
                 </div>
+                {/* 预览弹窗 */}
+                {previewImg && (
+                  <div
+                    style={{
+                      position: 'fixed',
+                      top: 0,
+                      left: 0,
+                      width: '100vw',
+                      height: '100vh',
+                      background: 'rgba(0,0,0,0.8)',
+                      zIndex: 9999,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                    onClick={() => setPreviewImg(null)}
+                  >
+                    <Zoom>
+                      <img
+                        src={previewImg}
+                        alt="预览图片"
+                        style={{
+                          maxWidth: '95vw',
+                          maxHeight: '80vh',
+                          borderRadius: 12,
+                          boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+                          background: '#111827',
+                        }}
+                      />
+                    </Zoom>
+                  </div>
+                )}
               </div>
             )}
           </div>
