@@ -63,60 +63,122 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="container mx-auto px-4 py-12" style={{ width: 900, minWidth: 900, maxWidth: 900 }}>
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold gradient-text mb-4">
-              新视力
-            </h1>
-            <p className="text-gray-600 text-lg">
-              遇见惊喜，创造新视力
-            </p>
-          </div>
-
-          <div className="card mb-8">
-            <InputForm onSubmit={handleSubmit} placeholder="粘贴链接或输入内容..." hideUrlOption debugInfo={debugInfo} />
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-4 mb-8">
-              {error}
+      <div className="home-page">
+        <div className="container mx-auto px-4 py-12" style={{ maxWidth: '900px' }}>
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl font-bold gradient-text mb-4">
+                新视力
+              </h1>
+              <p className="text-gray-600 text-lg">
+                遇见惊喜，创造新视力
+              </p>
             </div>
-          )}
 
-          {analyzedContent && (
-            <div className="card" id="bento-container">
-              <BentoGrid 
-                ref={bentoRef}
-                title={analyzedContent.title}
-                subtitle={analyzedContent.summary}
-                tags={analyzedContent.tags}
-                author={analyzedContent.author}
-                rawContent={analyzedContent.rawContent}
-                sections={Array.isArray(analyzedContent.sections)
-                  ? analyzedContent.sections.map((item) =>
-                      typeof item === 'string'
-                        ? { title: item, items: [] }
-                        : item
-                    )
-                  : []}
-                meta={{
-                  title: analyzedContent.title,
-                  author: analyzedContent.author,
-                  url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
-                }}
-              />
-              <div className="flex flex-col items-end">
-                <div className="flex gap-2 flex-wrap justify-end">
-                  <button
-                    onClick={async () => {
-                      try {
+            <div className="card mb-8">
+              <InputForm onSubmit={handleSubmit} placeholder="粘贴链接或输入内容..." hideUrlOption debugInfo={debugInfo} />
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-4 mb-8">
+                {error}
+              </div>
+            )}
+
+            {analyzedContent && (
+              <div className="card" id="bento-container">
+                <BentoGrid 
+                  ref={bentoRef}
+                  title={analyzedContent.title}
+                  subtitle={analyzedContent.summary}
+                  tags={analyzedContent.tags}
+                  author={analyzedContent.author}
+                  rawContent={analyzedContent.rawContent}
+                  sections={Array.isArray(analyzedContent.sections)
+                    ? analyzedContent.sections.map((item) =>
+                        typeof item === 'string'
+                          ? { title: item, items: [] }
+                          : item
+                      )
+                    : []}
+                  meta={{
+                    title: analyzedContent.title,
+                    author: analyzedContent.author,
+                    url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
+                  }}
+                />
+                <div className="flex flex-col items-end">
+                  <div className="flex gap-2 flex-wrap justify-end">
+                    <button
+                      onClick={async () => {
+                        try {
+                          if (!analyzedContent) {
+                            alert('没有可用的内容数据');
+                            return;
+                          }
+                          
+                          // 生成固定ID
+                          const bentoDataId = 'current-bento-data';
+                          
+                          // 确保使用JSON.stringify处理整个对象
+                          const jsonData = JSON.stringify(analyzedContent, (key, value) => {
+                            // 这里确保所有函数和特殊对象被正确序列化
+                            if (typeof value === 'function') {
+                              return undefined; // 忽略函数属性
+                            }
+                            return value;
+                          });
+                          
+                          // 使用localStorage存储数据
+                          localStorage.setItem(bentoDataId, jsonData);
+                          console.log('数据已保存到localStorage, ID:', bentoDataId, '数据长度:', jsonData.length);
+                          
+                          // 构建专门用于截图的页面URL
+                          const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
+                          
+                          // 调用截图服务
+                          const response = await fetch('https://xianwenai.com/screenshot', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              url: renderUrl,
+                              width: 820,
+                              height: 1200,
+                              selector: '#bento-container',
+                              fullPage: false,
+                              waitForSelector: '#bento-container',
+                              delay: 2000 // 增加等待时间到2秒
+                            })
+                          });
+                          
+                          if (!response.ok) {
+                            alert('截图服务异常');
+                            return;
+                          }
+                          
+                          const blob = await response.blob();
+                          const link = document.createElement('a');
+                          link.href = URL.createObjectURL(blob);
+                          link.download = 'bento-screenshot.png';
+                          link.click();
+                        } catch (e) {
+                          console.error('截图错误:', e);
+                          alert('截图服务异常');
+                        }
+                      }}
+                      className="btn-primary mt-4"
+                    >
+                      下载为图片
+                    </button>
+                    
+                    <button
+                      onClick={() => {
                         if (!analyzedContent) {
                           alert('没有可用的内容数据');
                           return;
                         }
                         
-                        // 生成固定ID
+                        // 使用固定ID
                         const bentoDataId = 'current-bento-data';
                         
                         // 确保使用JSON.stringify处理整个对象
@@ -135,82 +197,22 @@ export default function Home() {
                         // 构建专门用于截图的页面URL
                         const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
                         
-                        // 调用截图服务
-                        const response = await fetch('https://xianwenai.com/screenshot', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            url: renderUrl,
-                            width: 820,
-                            height: 1200,
-                            selector: '#bento-container',
-                            fullPage: false,
-                            waitForSelector: '#bento-container',
-                            delay: 2000 // 增加等待时间到2秒
-                          })
-                        });
-                        
-                        if (!response.ok) {
-                          alert('截图服务异常');
-                          return;
-                        }
-                        
-                        const blob = await response.blob();
-                        const link = document.createElement('a');
-                        link.href = URL.createObjectURL(blob);
-                        link.download = 'bento-screenshot.png';
-                        link.click();
-                      } catch (e) {
-                        console.error('截图错误:', e);
-                        alert('截图服务异常');
-                      }
-                    }}
-                    className="btn-primary mt-4"
-                  >
-                    下载为图片
-                  </button>
+                        // 在新窗口打开预览页面
+                        window.open(renderUrl, '_blank');
+                      }}
+                      className="btn-secondary mt-4"
+                    >
+                      预览页面
+                    </button>
+                  </div>
                   
-                  <button
-                    onClick={() => {
-                      if (!analyzedContent) {
-                        alert('没有可用的内容数据');
-                        return;
-                      }
-                      
-                      // 使用固定ID
-                      const bentoDataId = 'current-bento-data';
-                      
-                      // 确保使用JSON.stringify处理整个对象
-                      const jsonData = JSON.stringify(analyzedContent, (key, value) => {
-                        // 这里确保所有函数和特殊对象被正确序列化
-                        if (typeof value === 'function') {
-                          return undefined; // 忽略函数属性
-                        }
-                        return value;
-                      });
-                      
-                      // 使用localStorage存储数据
-                      localStorage.setItem(bentoDataId, jsonData);
-                      console.log('数据已保存到localStorage, ID:', bentoDataId, '数据长度:', jsonData.length);
-                      
-                      // 构建专门用于截图的页面URL
-                      const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
-                      
-                      // 在新窗口打开预览页面
-                      window.open(renderUrl, '_blank');
-                    }}
-                    className="btn-secondary mt-4"
-                  >
-                    预览页面
-                  </button>
+                  <p className="text-gray-500 text-xs mt-2">
+                    使用专用页面截图，确保更高质量的图片效果
+                  </p>
                 </div>
-                
-                <p className="text-gray-500 text-xs mt-2">
-                  使用专用页面截图，确保更高质量的图片效果
-                </p>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </main>

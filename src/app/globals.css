@@ -7,8 +7,33 @@
   --foreground: 222.2 84% 4.9%;
 }
 
+/* 全局背景修复 */
+html {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden; /* 防止水平滚动 */
+}
+
 body {
   @apply antialiased bg-gray-50;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  overflow-x: hidden; /* 防止水平滚动 */
+}
+
+/* 主页使用统一的白色背景 */
+.home-page {
+  background-color: white;
+  min-height: 100vh;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 @layer components {
@@ -103,18 +128,16 @@ body {
   line-height: 1.2 !important;
 }
 
+/* 确保移动端全屏展示，不出现间隙 */
 @media (max-width: 640px) {
-  .mobile-bg {
-    background: #232526 !important;
+  body {
+    @apply bg-gray-50;
     background-image: none !important;
   }
   
-  body {
-    @apply bg-gray-900;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    min-height: 100vh;
+  .mobile-bg {
+    background: #232526 !important;
+    background-image: none !important;
   }
   
   #bento-container {
@@ -123,20 +146,31 @@ body {
     max-width: 100% !important;
     padding: 8px !important;
   }
-}
-
-/* 新增：确保整个页面背景一致 */
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  min-height: 100vh;
+  
+  /* 修复移动端容器宽度 */
+  .container {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  
+  main {
+    width: 100%;
+    overflow-x: hidden;
+  }
 }
 
 /* 纯净版页面专用样式 */
 .bento-render-page {
   background-color: #111827 !important;
   background-image: none !important;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 /* 适应小屏幕的额外样式 */
