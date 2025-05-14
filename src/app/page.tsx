@@ -7,6 +7,7 @@ import BentoGrid from '@/components/BentoGrid';
 import type { Section } from '@/components/BentoGrid';
 import dynamic from 'next/dynamic';
 import { v4 as uuidv4 } from 'uuid';
+import { toPng } from 'html-to-image';
 
 const Zoom = dynamic(() => import('react-medium-image-zoom'), { ssr: false });
 import 'react-medium-image-zoom/dist/styles.css';
@@ -51,6 +52,7 @@ export default function Home() {
     setIsLoading(true);
     setError(null);
     setDebugInfo(null);
+    setPreviewImg(null);
     try {
       const response = await fetch('/api/process', {
         method: 'POST',
@@ -69,6 +71,22 @@ export default function Home() {
       setContent(text);
       setAnalyzedContent(data);
       setDebugInfo('已完成，下滑到底部，可下载高清图片');
+
+      setTimeout(async () => {
+        if (window.innerWidth < 700 && bentoRef.current) {
+          try {
+            const dataUrl = await toPng(bentoRef.current, {
+              quality: 1.0,
+              pixelRatio: 1,
+              width: window.innerWidth - 8,
+              backgroundColor: '#111827',
+            });
+            setPreviewImg(dataUrl);
+          } catch (e) {
+            setPreviewImg(null);
+          }
+        }
+      }, 400);
     } catch (err) {
       setError(err instanceof Error ? err.message : '处理内容时出错');
     } finally {
@@ -102,50 +120,65 @@ export default function Home() {
 
             {analyzedContent && (
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div
-                  style={
-                    isMobile
-                      ? {
-                          width: 820,
-                          minWidth: 820,
-                          maxWidth: 820,
-                          margin: '0 auto',
-                          boxSizing: 'border-box',
-                          display: 'block',
-                          transform: `scale(${window.innerWidth / 820})`,
-                          transformOrigin: 'top center',
-                        }
-                      : {
-                          width: 820,
-                          minWidth: 820,
-                          maxWidth: 820,
-                          margin: '0 auto',
-                          display: 'block',
-                        }
-                  }
-                  ref={bentoRef}
-                  id="bento-container"
-                >
-                  <BentoGrid
-                    title={analyzedContent.title}
-                    subtitle={analyzedContent.summary}
-                    tags={analyzedContent.tags}
-                    author={analyzedContent.author}
-                    rawContent={analyzedContent.rawContent}
-                    sections={Array.isArray(analyzedContent.sections)
-                      ? analyzedContent.sections.map((item) =>
-                          typeof item === 'string'
-                            ? { title: item, items: [] }
-                            : item
-                        )
-                      : []}
-                    meta={{
-                      title: analyzedContent.title,
-                      author: analyzedContent.author,
-                      url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
+                {isMobile && previewImg ? (
+                  <img
+                    src={previewImg}
+                    alt="BentoGrid缩略图"
+                    style={{
+                      width: 'calc(100vw - 8px)',
+                      maxWidth: 420,
+                      borderRadius: 12,
+                      margin: '0 auto',
+                      boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+                      background: '#111827',
                     }}
                   />
-                </div>
+                ) : (
+                  <div
+                    style={
+                      isMobile
+                        ? {
+                            width: 820,
+                            minWidth: 820,
+                            maxWidth: 820,
+                            margin: '0 auto',
+                            boxSizing: 'border-box',
+                            display: 'block',
+                            transform: `scale(${window.innerWidth / 820})`,
+                            transformOrigin: 'top center',
+                          }
+                        : {
+                            width: 820,
+                            minWidth: 820,
+                            maxWidth: 820,
+                            margin: '0 auto',
+                            display: 'block',
+                          }
+                    }
+                    ref={bentoRef}
+                    id="bento-container"
+                  >
+                    <BentoGrid
+                      title={analyzedContent.title}
+                      subtitle={analyzedContent.summary}
+                      tags={analyzedContent.tags}
+                      author={analyzedContent.author}
+                      rawContent={analyzedContent.rawContent}
+                      sections={Array.isArray(analyzedContent.sections)
+                        ? analyzedContent.sections.map((item) =>
+                            typeof item === 'string'
+                              ? { title: item, items: [] }
+                              : item
+                          )
+                        : []}
+                      meta={{
+                        title: analyzedContent.title,
+                        author: analyzedContent.author,
+                        url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
+                      }}
+                    />
+                  </div>
+                )}
                 <div 
                   className="flex gap-2 flex-wrap justify-center mt-4" 
                   style={{ 
@@ -156,38 +189,15 @@ export default function Home() {
                   }}
                 >
                   <button
-                    onClick={async () => {
-                      try {
-                        if (!analyzedContent) {
-                          alert('没有可用的内容数据');
-                          return;
-                        }
-                        if (bentoRef.current) {
-                          // 隐藏按钮
-                          bentoRef.current.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
-                            (el as HTMLElement).style.display = 'none';
-                          });
-                          const { toPng } = await import('html-to-image');
-                          const dataUrl = await toPng(bentoRef.current, {
-                            quality: 1.0,
-                            pixelRatio: 2,
-                            skipFonts: false,
-                            cacheBust: true,
-                            backgroundColor: '#111827'
-                          });
-                          // 恢复按钮
-                          bentoRef.current.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
-                            (el as HTMLElement).style.display = '';
-                          });
-                          // 下载
-                          const link = document.createElement('a');
-                          link.download = 'bento-grid.png';
-                          link.href = dataUrl;
-                          link.click();
-                        }
-                      } catch (e) {
-                        alert('下载图片失败，请稍后重试');
+                    onClick={() => {
+                      if (!analyzedContent) {
+                        alert('没有可用的内容数据');
+                        return;
                       }
+                      const bentoDataId = uuidv4();
+                      localStorage.setItem(bentoDataId, JSON.stringify(analyzedContent));
+                      const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}&download=1`;
+                      window.open(renderUrl, '_blank');
                     }}
                     className="btn-primary mt-4"
                   >
@@ -199,11 +209,8 @@ export default function Home() {
                         alert('没有可用的内容数据');
                         return;
                       }
-                      // 生成唯一ID
                       const bentoDataId = uuidv4();
-                      // 存数据到localStorage
                       localStorage.setItem(bentoDataId, JSON.stringify(analyzedContent));
-                      // 跳转新窗口
                       const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
                       window.open(renderUrl, '_blank');
                     }}
@@ -217,7 +224,7 @@ export default function Home() {
                       boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
                     }}
                   >
-                    预览图片
+                    预览高清图片
                   </button>
                 </div>
               </div>
