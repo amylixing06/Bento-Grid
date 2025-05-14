@@ -116,54 +116,59 @@ export default function Home() {
                             alert('没有可用的内容数据');
                             return;
                           }
-                          
-                          // 生成固定ID
-                          const bentoDataId = 'current-bento-data';
-                          
-                          // 确保使用JSON.stringify处理整个对象
-                          const jsonData = JSON.stringify(analyzedContent, (key, value) => {
-                            // 这里确保所有函数和特殊对象被正确序列化
-                            if (typeof value === 'function') {
-                              return undefined; // 忽略函数属性
+
+                          // 直接使用html-to-image库在前端截图，不依赖外部服务
+                          if (bentoRef.current) {
+                            // 确保截图元素可见并样式正确
+                            console.log('开始截图...');
+                            const element = bentoRef.current;
+                            
+                            // 截图前先移除可能干扰的元素
+                            element.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
+                              (el as HTMLElement).style.display = 'none';
+                            });
+                            
+                            // 使用toPng函数进行截图
+                            try {
+                              // 导入toPng
+                              const { toPng } = await import('html-to-image');
+                              
+                              // 执行截图
+                              const dataUrl = await toPng(element, {
+                                quality: 1.0,
+                                pixelRatio: 2,
+                                skipFonts: false,
+                                cacheBust: true,
+                                backgroundColor: '#111827'
+                              });
+                              
+                              // 恢复元素样式
+                              element.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
+                                (el as HTMLElement).style.display = '';
+                              });
+                              
+                              // 创建下载链接
+                              const link = document.createElement('a');
+                              link.download = 'bento-grid.png';
+                              link.href = dataUrl;
+                              link.click();
+                              
+                              console.log('截图完成，已触发下载');
+                            } catch (imgError) {
+                              console.error('截图过程出错:', imgError);
+                              alert('生成图片失败，请稍后重试');
+                              
+                              // 恢复元素样式
+                              element.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
+                                (el as HTMLElement).style.display = '';
+                              });
                             }
-                            return value;
-                          });
-                          
-                          // 使用localStorage存储数据
-                          localStorage.setItem(bentoDataId, jsonData);
-                          console.log('数据已保存到localStorage, ID:', bentoDataId, '数据长度:', jsonData.length);
-                          
-                          // 构建专门用于截图的页面URL
-                          const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
-                          
-                          // 调用截图服务
-                          const response = await fetch('https://xianwenai.com/screenshot', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              url: renderUrl,
-                              width: 820,
-                              height: 1200,
-                              selector: '#bento-container',
-                              fullPage: false,
-                              waitForSelector: '#bento-container',
-                              delay: 2000 // 增加等待时间到2秒
-                            })
-                          });
-                          
-                          if (!response.ok) {
-                            alert('截图服务异常');
-                            return;
+                          } else {
+                            alert('内容元素未找到，无法截图');
                           }
-                          
-                          const blob = await response.blob();
-                          const link = document.createElement('a');
-                          link.href = URL.createObjectURL(blob);
-                          link.download = 'bento-screenshot.png';
-                          link.click();
                         } catch (e) {
-                          console.error('截图错误:', e);
-                          alert('截图服务异常');
+                          console.error('下载操作错误:', e);
+                          alert('下载图片失败，请稍后重试');
                         }
                       }}
                       className="btn-primary mt-4"
@@ -178,7 +183,7 @@ export default function Home() {
                           return;
                         }
                         
-                        // 使用固定ID
+                        // 使用localStorage存储数据
                         const bentoDataId = 'current-bento-data';
                         
                         // 确保使用JSON.stringify处理整个对象

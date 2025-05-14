@@ -121,6 +121,7 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
         minHeight: 0,
         background: 'linear-gradient(135deg, #232526 0%, #414345 100%)',
         padding: 24,
+        position: 'relative',
       }}>
         {/* 主标题卡片（始终顶部） */}
         <div style={{ paddingLeft: 24, paddingRight: 24 }}>
