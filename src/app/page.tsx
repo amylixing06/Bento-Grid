@@ -116,7 +116,9 @@ export default function Home() {
                         body: JSON.stringify({
                           url: window.location.href,
                           width: 820,
-                          height: 1200
+                          height: 1200,
+                          selector: '.card:nth-child(3)',
+                          fullPage: false
                         })
                       });
                       if (!response.ok) {
