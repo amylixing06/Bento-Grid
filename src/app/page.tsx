@@ -109,6 +109,7 @@ export default function Home() {
                           margin: '0 auto',
                           boxSizing: 'border-box',
                           display: 'block',
+                          maxWidth: '100%',
                         }
                       : {
                           width: 820,

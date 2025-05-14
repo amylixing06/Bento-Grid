@@ -143,10 +143,11 @@ body {
   #bento-container {
     width: calc(100vw - 8px) !important;
     min-width: 0 !important;
-    max-width: calc(100vw - 8px) !important;
+    max-width: 100% !important;
     padding: 0 !important;
     margin: 0 auto !important;
     overflow: hidden !important;
+    box-sizing: border-box !important;
   }
   
   /* 修复移动端容器宽度 */
@@ -156,6 +157,7 @@ body {
     max-width: 100% !important;
     padding-left: 4px !important;
     padding-right: 4px !important;
+    box-sizing: border-box !important;
   }
   
   main {
@@ -180,10 +182,11 @@ body {
   #bento-container {
     width: calc(100vw - 8px) !important;
     min-width: 0 !important;
-    max-width: calc(100vw - 8px) !important;
+    max-width: 100% !important;
     padding: 0 !important;
     margin: 0 auto !important;
     overflow: hidden !important;
+    box-sizing: border-box !important;
   }
   
   /* 调整卡片内边距 */
