@@ -109,11 +109,19 @@ function BentoContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-8 relative">
-      {/* 确保移动端背景一致 */}
-      <div className="absolute inset-0 bg-gray-900 z-0"></div>
-      <div id="bento-container" className="relative z-10" style={{ width: 820, maxWidth: '100%', margin: '0 auto' }}>
-        <BentoGrid 
+    <div
+      className="min-h-screen bg-gray-900 py-8"
+      style={{
+        overflow: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        touchAction: 'pan-zoom',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+      }}
+    >
+      <div id="bento-container" style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '0 auto' }}>
+        <BentoGrid
           title={analyzedContent.title}
           subtitle={analyzedContent.summary}
           tags={analyzedContent.tags}

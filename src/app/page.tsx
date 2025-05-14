@@ -5,6 +5,7 @@ import InputForm from '@/components/InputForm';
 import BentoGrid from '@/components/BentoGrid';
 import type { Section } from '@/components/BentoGrid';
 import dynamic from 'next/dynamic';
+import { v4 as uuidv4 } from 'uuid';
 
 const Zoom = dynamic(() => import('react-medium-image-zoom'), { ssr: false });
 import 'react-medium-image-zoom/dist/styles.css';
@@ -171,68 +172,24 @@ export default function Home() {
                     下载高清图片
                   </button>
                   <button
-                    onClick={async () => {
+                    onClick={() => {
                       if (!analyzedContent) {
                         alert('没有可用的内容数据');
                         return;
                       }
-                      if (bentoRef.current) {
-                        // 隐藏按钮
-                        bentoRef.current.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
-                          (el as HTMLElement).style.display = 'none';
-                        });
-                        const { toPng } = await import('html-to-image');
-                        const dataUrl = await toPng(bentoRef.current, {
-                          quality: 1.0,
-                          pixelRatio: 2,
-                          skipFonts: false,
-                          cacheBust: true,
-                          backgroundColor: '#111827'
-                        });
-                        // 恢复按钮
-                        bentoRef.current.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
-                          (el as HTMLElement).style.display = '';
-                        });
-                        setPreviewImg(dataUrl);
-                      }
+                      // 生成唯一ID
+                      const bentoDataId = uuidv4();
+                      // 存数据到localStorage
+                      localStorage.setItem(bentoDataId, JSON.stringify(analyzedContent));
+                      // 跳转新窗口
+                      const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
+                      window.open(renderUrl, '_blank');
                     }}
                     className="btn-secondary mt-4"
                   >
                     预览图片
                   </button>
                 </div>
-                {/* 预览弹窗 */}
-                {previewImg && (
-                  <div
-                    style={{
-                      position: 'fixed',
-                      top: 0,
-                      left: 0,
-                      width: '100vw',
-                      height: '100vh',
-                      background: 'rgba(0,0,0,0.8)',
-                      zIndex: 9999,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                    onClick={() => setPreviewImg(null)}
-                  >
-                    <Zoom>
-                      <img
-                        src={previewImg}
-                        alt="预览图片"
-                        style={{
-                          maxWidth: '95vw',
-                          maxHeight: '80vh',
-                          borderRadius: 12,
-                          boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
-                          background: '#111827',
-                        }}
-                      />
-                    </Zoom>
-                  </div>
-                )}
               </div>
             )}
           </div>
