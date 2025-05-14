@@ -101,121 +101,128 @@ export default function Home() {
             )}
 
             {analyzedContent && (
-              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div
-                  style={
-                    isMobile
-                      ? {
-                          width: 'calc(100vw - 8px)',
-                          margin: '0 auto',
-                          boxSizing: 'border-box',
-                          display: 'block',
-                          maxWidth: '100%',
-                        }
-                      : {
-                          width: 820,
-                          minWidth: 820,
-                          maxWidth: 820,
-                          margin: '0 auto',
-                          display: 'block',
-                        }
-                  }
-                  ref={bentoRef}
-                  id="bento-container"
-                >
-                  <BentoGrid
-                    title={analyzedContent.title}
-                    subtitle={analyzedContent.summary}
-                    tags={analyzedContent.tags}
-                    author={analyzedContent.author}
-                    rawContent={analyzedContent.rawContent}
-                    sections={Array.isArray(analyzedContent.sections)
-                      ? analyzedContent.sections.map((item) =>
-                          typeof item === 'string'
-                            ? { title: item, items: [] }
-                            : item
-                        )
-                      : []}
-                    meta={{
-                      title: analyzedContent.title,
-                      author: analyzedContent.author,
-                      url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
+              <div style={{ width: '100vw', overflowX: 'auto', padding: 0, margin: 0 }}>
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div
+                    style={
+                      isMobile
+                        ? {
+                            width: 820,
+                            minWidth: 820,
+                            maxWidth: 820,
+                            margin: '0 auto',
+                            boxSizing: 'border-box',
+                            display: 'block',
+                            transform: `scale(${(window.innerWidth - 8) / 820})`,
+                            transformOrigin: 'top center',
+                          }
+                        : {
+                            width: 820,
+                            minWidth: 820,
+                            maxWidth: 820,
+                            margin: '0 auto',
+                            display: 'block',
+                          }
+                    }
+                    ref={bentoRef}
+                    id="bento-container"
+                  >
+                    <BentoGrid
+                      title={analyzedContent.title}
+                      subtitle={analyzedContent.summary}
+                      tags={analyzedContent.tags}
+                      author={analyzedContent.author}
+                      rawContent={analyzedContent.rawContent}
+                      sections={Array.isArray(analyzedContent.sections)
+                        ? analyzedContent.sections.map((item) =>
+                            typeof item === 'string'
+                              ? { title: item, items: [] }
+                              : item
+                          )
+                        : []}
+                      meta={{
+                        title: analyzedContent.title,
+                        author: analyzedContent.author,
+                        url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
+                      }}
+                    />
+                  </div>
+                  <div 
+                    className="flex gap-2 flex-wrap justify-end mt-4" 
+                    style={{ 
+                      maxWidth: isMobile ? 820 : 820,
+                      width: isMobile ? 820 : 820,
+                      margin: '0 auto',
+                      alignSelf: 'center',
+                      transform: isMobile ? `scale(${(window.innerWidth - 8) / 820})` : 'none',
+                      transformOrigin: 'top center',
                     }}
-                  />
-                </div>
-                <div 
-                  className="flex gap-2 flex-wrap justify-end mt-4" 
-                  style={{ 
-                    maxWidth: isMobile ? 'calc(100vw - 8px)' : 820,
-                    width: '100%',
-                    margin: '0 auto',
-                    alignSelf: 'center'
-                  }}
-                >
-                  <button
-                    onClick={async () => {
-                      try {
+                  >
+                    <button
+                      onClick={async () => {
+                        try {
+                          if (!analyzedContent) {
+                            alert('没有可用的内容数据');
+                            return;
+                          }
+                          if (bentoRef.current) {
+                            // 隐藏按钮
+                            bentoRef.current.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
+                              (el as HTMLElement).style.display = 'none';
+                            });
+                            const { toPng } = await import('html-to-image');
+                            const dataUrl = await toPng(bentoRef.current, {
+                              quality: 1.0,
+                              pixelRatio: 2,
+                              skipFonts: false,
+                              cacheBust: true,
+                              backgroundColor: '#111827'
+                            });
+                            // 恢复按钮
+                            bentoRef.current.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
+                              (el as HTMLElement).style.display = '';
+                            });
+                            // 下载
+                            const link = document.createElement('a');
+                            link.download = 'bento-grid.png';
+                            link.href = dataUrl;
+                            link.click();
+                          }
+                        } catch (e) {
+                          alert('下载图片失败，请稍后重试');
+                        }
+                      }}
+                      className="btn-primary mt-4"
+                    >
+                      下载高清图片
+                    </button>
+                    <button
+                      onClick={() => {
                         if (!analyzedContent) {
                           alert('没有可用的内容数据');
                           return;
                         }
-                        if (bentoRef.current) {
-                          // 隐藏按钮
-                          bentoRef.current.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
-                            (el as HTMLElement).style.display = 'none';
-                          });
-                          const { toPng } = await import('html-to-image');
-                          const dataUrl = await toPng(bentoRef.current, {
-                            quality: 1.0,
-                            pixelRatio: 2,
-                            skipFonts: false,
-                            cacheBust: true,
-                            backgroundColor: '#111827'
-                          });
-                          // 恢复按钮
-                          bentoRef.current.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(el => {
-                            (el as HTMLElement).style.display = '';
-                          });
-                          // 下载
-                          const link = document.createElement('a');
-                          link.download = 'bento-grid.png';
-                          link.href = dataUrl;
-                          link.click();
-                        }
-                      } catch (e) {
-                        alert('下载图片失败，请稍后重试');
-                      }
-                    }}
-                    className="btn-primary mt-4"
-                  >
-                    下载高清图片
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (!analyzedContent) {
-                        alert('没有可用的内容数据');
-                        return;
-                      }
-                      // 生成唯一ID
-                      const bentoDataId = uuidv4();
-                      // 存数据到localStorage
-                      localStorage.setItem(bentoDataId, JSON.stringify(analyzedContent));
-                      // 跳转新窗口
-                      const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
-                      window.open(renderUrl, '_blank');
-                    }}
-                    className="mt-4"
-                    style={{
-                      background: '#e0e0e0',
-                      color: '#333',
-                      borderRadius: 16,
-                      fontWeight: 600,
-                      padding: '0.75rem 2.5rem',
-                      boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
-                    }}
-                  >
-                    预览图片
-                  </button>
+                        // 生成唯一ID
+                        const bentoDataId = uuidv4();
+                        // 存数据到localStorage
+                        localStorage.setItem(bentoDataId, JSON.stringify(analyzedContent));
+                        // 跳转新窗口
+                        const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
+                        window.open(renderUrl, '_blank');
+                      }}
+                      className="mt-4"
+                      style={{
+                        background: '#e0e0e0',
+                        color: '#333',
+                        borderRadius: 16,
+                        fontWeight: 600,
+                        padding: '0.75rem 2.5rem',
+                        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
+                      }}
+                    >
+                      预览图片
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
