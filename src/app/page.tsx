@@ -67,7 +67,7 @@ export default function Home() {
       const data = await response.json();
       setContent(text);
       setAnalyzedContent(data);
-      setDebugInfo('已完成，下滑到低部可下载高清图片');
+      setDebugInfo('已完成，下滑到底部，可下载高清图片');
     } catch (err) {
       setError(err instanceof Error ? err.message : '处理内容时出错');
     } finally {
