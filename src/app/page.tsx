@@ -40,6 +40,7 @@ export default function Home() {
   const bentoRef = useRef<HTMLDivElement>(null);
   const [previewImg, setPreviewImg] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [bentoDataId, setBentoDataId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 700);
@@ -53,6 +54,7 @@ export default function Home() {
     setError(null);
     setDebugInfo(null);
     setPreviewImg(null);
+    setBentoDataId(null);
     try {
       const response = await fetch('/api/process', {
         method: 'POST',
@@ -72,27 +74,34 @@ export default function Home() {
       setAnalyzedContent(data);
       setDebugInfo('已完成，下滑到底部，可下载高清图片');
 
-      setTimeout(async () => {
-        if (window.innerWidth < 700 && bentoRef.current) {
-          try {
-            const dataUrl = await toPng(bentoRef.current, {
-              quality: 1.0,
-              pixelRatio: 1,
-              width: window.innerWidth - 8,
-              backgroundColor: '#111827',
-            });
-            setPreviewImg(dataUrl);
-          } catch (e) {
-            setPreviewImg(null);
-          }
-        }
-      }, 400);
+      // 生成唯一ID并存储
+      const newId = uuidv4();
+      setBentoDataId(newId);
+      localStorage.setItem(newId, JSON.stringify(data));
     } catch (err) {
       setError(err instanceof Error ? err.message : '处理内容时出错');
     } finally {
       setIsLoading(false);
     }
   };
+
+  // 获取缩略图blob并生成本地URL
+  async function fetchScreenshot(bentoUrl: string) {
+    const res = await fetch('https://xianwenai.com/screenshot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: bentoUrl, width: 360, selector: '#bento-container' })
+    });
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
+  }
+
+  useEffect(() => {
+    if (isMobile && bentoDataId) {
+      const bentoUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
+      fetchScreenshot(bentoUrl).then(setPreviewImg);
+    }
+  }, [isMobile, bentoDataId]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -120,6 +129,7 @@ export default function Home() {
 
             {analyzedContent && (
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                {/* 移动端展示后端截图服务生成的缩略图 */}
                 {isMobile && previewImg ? (
                   <img
                     src={previewImg}
