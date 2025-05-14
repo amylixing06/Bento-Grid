@@ -85,7 +85,7 @@ export default function Home() {
           )}
 
           {analyzedContent && (
-            <div className="card">
+            <div className="card" id="bento-container">
               <BentoGrid 
                 ref={bentoRef}
                 title={analyzedContent.title}
@@ -117,7 +117,7 @@ export default function Home() {
                           url: window.location.href,
                           width: 820,
                           height: 1200,
-                          selector: '.card:nth-child(3)',
+                          selector: '#bento-container',
                           fullPage: false
                         })
                       });
