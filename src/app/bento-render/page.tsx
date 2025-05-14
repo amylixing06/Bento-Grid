@@ -134,7 +134,7 @@ function BentoContent() {
 
   return (
     <div
-      className="min-h-screen bg-gray-900 py-8"
+      className="min-h-screen bg-gray-900 py-8 bento-render-page"
       style={{
         overflow: 'auto',
         WebkitOverflowScrolling: 'touch',
