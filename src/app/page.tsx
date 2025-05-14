@@ -101,7 +101,28 @@ export default function Home() {
 
             {analyzedContent && (
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ display: 'inline-block', width: 820, minWidth: 820, maxWidth: 820, transform: isMobile ? 'scale(0.45)' : 'none', transformOrigin: 'top left', verticalAlign: 'top' }} ref={bentoRef} id="bento-container">
+                <div
+                  style={
+                    isMobile
+                      ? {
+                          width: '100vw',
+                          maxWidth: 820,
+                          minWidth: 0,
+                          margin: '0 auto',
+                          boxSizing: 'border-box',
+                          display: 'block',
+                        }
+                      : {
+                          width: 820,
+                          minWidth: 820,
+                          maxWidth: 820,
+                          margin: '0 auto',
+                          display: 'block',
+                        }
+                  }
+                  ref={bentoRef}
+                  id="bento-container"
+                >
                   <BentoGrid
                     title={analyzedContent.title}
                     subtitle={analyzedContent.summary}
