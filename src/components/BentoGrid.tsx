@@ -92,21 +92,9 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
 }, ref) {
   const gridRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [scale, setScale] = useState(1);
 
   useEffect(() => {
-    const checkMobile = () => {
-      const isMobileView = window.innerWidth <= 820;
-      setIsMobile(isMobileView);
-      if (isMobileView) {
-        const containerWidth = window.innerWidth - 8;
-        const scale = containerWidth / 820;
-        setScale(scale);
-      } else {
-        setScale(1);
-      }
-    };
-
+    const checkMobile = () => setIsMobile(window.innerWidth <= 820);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -134,74 +122,69 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
   return (
     <>
       <div ref={gridRef} style={{
-        width: 820,
-        minWidth: 820,
+        width: '100%',
         maxWidth: 820,
-        borderRadius: 4,
         margin: '0 auto',
-        minHeight: 0,
+        borderRadius: isMobile ? '2vw' : 8,
         background: 'linear-gradient(135deg, #232526 0%, #414345 100%)',
-        padding: 24,
-        position: 'relative',
-        transform: isMobile ? `scale(${scale})` : 'none',
-        transformOrigin: 'top center',
+        padding: isMobile ? '4vw' : 24,
+        boxSizing: 'border-box',
       }}>
         {/* 主标题卡片（始终顶部） */}
-        <div style={{ paddingLeft: 24, paddingRight: 24 }}>
+        <div style={{ paddingLeft: isMobile ? '2vw' : 24, paddingRight: isMobile ? '2vw' : 24 }}>
           {(title || subtitle) && (
             <div style={{
               background: '#18181b',
-              borderRadius: 12,
+              borderRadius: isMobile ? '3vw' : 12,
               boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
-              padding: 32,
-              marginBottom: 24,
+              padding: isMobile ? '6vw 4vw' : 32,
+              marginBottom: isMobile ? '4vw' : 24,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
             }}>
               {title && <h1 style={{
-                fontSize: 40,
+                fontSize: isMobile ? 'clamp(1.5rem, 6vw, 2.5rem)' : 40,
                 fontWeight: 800,
                 background: 'linear-gradient(90deg, #FFD600 0%, #FF9800 100%)',
                 WebkitBackgroundClip: 'text',
                 color: 'transparent',
-                marginBottom: 8,
+                marginBottom: isMobile ? '2vw' : 8,
                 textAlign: 'center',
                 letterSpacing: 2,
               }}>{title}</h1>}
-              {subtitle && <div style={{ color: '#bbb', fontSize: 18, marginBottom: 8, textAlign: 'center', fontWeight: 500, letterSpacing: 1 }}>{subtitle}</div>}
+              {subtitle && <div style={{ color: '#bbb', fontSize: isMobile ? 'clamp(1rem, 4vw, 1.2rem)' : 18, marginBottom: isMobile ? '2vw' : 8, textAlign: 'center', fontWeight: 500, letterSpacing: 1 }}>{subtitle}</div>}
             </div>
           )}
         </div>
         {/* 大数字卡片 */}
         {coreNumbers.length > 0 && (
-          <div style={{ paddingLeft: 24, paddingRight: 24 }}>
-            <div style={{ display: 'flex', gap: 24, marginBottom: 24 }}>
+          <div style={{ paddingLeft: isMobile ? '2vw' : 24, paddingRight: isMobile ? '2vw' : 24 }}>
+            <div style={{ display: 'flex', gap: isMobile ? '3vw' : 24, marginBottom: isMobile ? '4vw' : 24, flexDirection: isMobile ? 'column' : 'row' }}>
               {coreNumbers.map((num, idx) => (
                 <div key={idx} style={{
                   background: '#18181b',
-                  borderRadius: 12,
+                  borderRadius: isMobile ? '3vw' : 12,
                   boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
-                  padding: 32,
+                  padding: isMobile ? '6vw 4vw' : 32,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   flex: 1,
+                  minWidth: 0,
                 }}>
-                  <div style={{ fontSize: 56, fontWeight: 800, color: '#fff', marginBottom: 12 }}>{num.number}</div>
-                  <div style={{ color: '#ccc', fontSize: 18 }}>{num.desc}</div>
+                  <div style={{ fontSize: isMobile ? 'clamp(2rem, 8vw, 3.5rem)' : 56, fontWeight: 800, color: '#fff', marginBottom: isMobile ? '2vw' : 12 }}>{num.number}</div>
+                  <div style={{ color: '#ccc', fontSize: isMobile ? 'clamp(1rem, 4vw, 1.2rem)' : 18 }}>{num.desc}</div>
                 </div>
               ))}
             </div>
           </div>
         )}
-        {/* 分区卡片排版：小于3补空，4=2+2，5=3+2，6=3+3，7=3+2+2，8=3+3+2，9=3+3+3 */}
-        <div style={{ width: '100%', paddingLeft: 24, paddingRight: 24 }}>
+        {/* 分区卡片排版 */}
+        <div style={{ width: '100%', paddingLeft: isMobile ? '2vw' : 24, paddingRight: isMobile ? '2vw' : 24 }}>
           {(() => {
             if (!sections || sections.length === 0) return null;
-            // 最多9个分区
             let displaySections = sections.slice(0, 9);
-            // 小于3补空
             while (displaySections.length < 3) {
               displaySections.push({ title: '', items: [] });
             }
@@ -231,24 +214,25 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
               layout.push([displaySections[6], displaySections[7], displaySections[8]]);
             }
             return layout.map((row, rowIdx) => (
-              <div key={rowIdx} style={{ display: 'flex', width: '100%', gap: 24, marginBottom: 24 }}>
+              <div key={rowIdx} style={{ display: 'flex', width: '100%', gap: isMobile ? '3vw' : 24, marginBottom: isMobile ? '4vw' : 24, flexDirection: isMobile && row.length > 1 ? 'column' : 'row' }}>
                 {row.map((section, idx) => (
                   <div
                     key={idx}
                     style={{
                       background: '#18181b',
-                      borderRadius: 12,
+                      borderRadius: isMobile ? '3vw' : 12,
                       boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
-                      padding: 32,
+                      padding: isMobile ? '6vw 4vw' : 32,
                       display: 'flex',
                       flexDirection: 'column',
-                      width: `${100 / row.length}%`,
-                      minHeight: 180,
+                      width: isMobile ? '100%' : `${100 / row.length}%`,
+                      minHeight: isMobile ? '24vw' : 180,
+                      minWidth: 0,
                     }}
                   >
                     {/* 分区标题 */}
                     {section.title && (
-                      <div style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 24, display: 'flex', alignItems: 'center' }}>
+                      <div style={{ fontSize: isMobile ? 'clamp(1.1rem, 4vw, 1.5rem)' : 24, fontWeight: 700, color: '#fff', marginBottom: isMobile ? '2vw' : 24, display: 'flex', alignItems: 'center' }}>
                         {section.title.includes('吸引') && <span className="mr-2">🧲</span>}
                         {section.title.includes('激发') && <span className="mr-2">💡</span>}
                         {section.title.includes('引导') && <span className="mr-2">🚩</span>}
@@ -256,15 +240,15 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
                         {section.title}
                       </div>
                     )}
-                    <ul style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <ul style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '2vw' : 16 }}>
                       {section.items && section.items.map((item, i) => (
                         <li key={i}>
-                          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4, display: 'flex', alignItems: 'center' }}>
-                            <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 6, background: 'linear-gradient(90deg, #FFD600 0%, #FFB300 100%)', color: '#222', fontWeight: 700, fontSize: 16, marginRight: 8 }}>
+                          <div style={{ fontWeight: 700, fontSize: isMobile ? 'clamp(1rem, 3.5vw, 1.1rem)' : 18, marginBottom: isMobile ? '1vw' : 4, display: 'flex', alignItems: 'center' }}>
+                            <span style={{ display: 'inline-block', padding: isMobile ? '0.3em 0.8em' : '2px 8px', borderRadius: isMobile ? '1vw' : 6, background: 'linear-gradient(90deg, #FFD600 0%, #FFB300 100%)', color: '#222', fontWeight: 700, fontSize: isMobile ? 'clamp(0.9rem, 3vw, 1rem)' : 16, marginRight: isMobile ? '1vw' : 8 }}>
                               {item.label}
                             </span>
                           </div>
-                          <div style={{ color: '#ccc', fontSize: 16, marginLeft: 4 }}>{item.value}</div>
+                          <div style={{ color: '#ccc', fontSize: isMobile ? 'clamp(0.9rem, 3vw, 1rem)' : 16, marginLeft: 4 }}>{item.value}</div>
                         </li>
                       ))}
                     </ul>
@@ -276,42 +260,43 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
         </div>
         {/* 标签+二维码+原文信息整合区 */}
         {(tags && tags.length > 0) && (
-          <div style={{ paddingLeft: 24, paddingRight: 24 }}>
+          <div style={{ paddingLeft: isMobile ? '2vw' : 24, paddingRight: isMobile ? '2vw' : 24 }}>
             <div style={{
               background: '#18181b',
-              borderRadius: 12,
+              borderRadius: isMobile ? '3vw' : 12,
               boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
-              padding: 24,
+              padding: isMobile ? '4vw' : 24,
               width: '100%',
               minWidth: 0,
               display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: isMobile ? 'flex-start' : 'center',
+              gap: isMobile ? '3vw' : 0,
             }}>
               {/* 左侧二维码及提示 */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 100, marginRight: 32 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: isMobile ? 48 : 100, marginRight: isMobile ? 0 : 32, marginBottom: isMobile ? '2vw' : 0 }}>
                 {meta && meta.url && (
                   <a href={meta.url.startsWith('http') ? meta.url : `https://${meta.url}`} target="_blank" rel="noopener noreferrer">
-                    <QRCodeCanvas value={meta.url.startsWith('http') ? meta.url : `https://${meta.url}`} size={100} />
+                    <QRCodeCanvas value={meta.url.startsWith('http') ? meta.url : `https://${meta.url}`} size={isMobile ? 64 : 100} />
                   </a>
                 )}
                 {(!meta || !meta.url) && (
-                  <QRCodeCanvas value={meta && meta.title ? meta.title : '扫码体验'} size={100} />
+                  <QRCodeCanvas value={meta && meta.title ? meta.title : '扫码体验'} size={isMobile ? 64 : 100} />
                 )}
-                <div style={{ marginTop: 12, fontSize: 14, color: '#aaa', whiteSpace: 'nowrap' }}>
+                <div style={{ marginTop: isMobile ? '1vw' : 12, fontSize: isMobile ? 'clamp(0.8rem, 2.5vw, 1rem)' : 14, color: '#aaa', whiteSpace: 'nowrap' }}>
                   {meta && meta.url ? '扫码阅读原文' : '扫码体验'}
                 </div>
               </div>
               {/* 右侧内容 */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 12, lineHeight: '32px' }}>{meta && meta.title ? meta.title : '原文标题'}</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+                <div style={{ fontSize: isMobile ? 'clamp(1.1rem, 4vw, 1.5rem)' : 24, fontWeight: 700, color: '#fff', marginBottom: isMobile ? '1vw' : 12, lineHeight: isMobile ? '1.3' : '32px' }}>{meta && meta.title ? meta.title : '原文标题'}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '1vw' : 8, marginBottom: isMobile ? '1vw' : 12 }}>
                   {tags.map((tag) => (
-                    <span key={tag} style={{ display: 'inline-block', padding: '2px 12px', borderRadius: 16, background: 'linear-gradient(90deg, #FFF9C4 0%, #FFE0B2 100%)', color: '#FF9800', fontSize: 16, fontWeight: 600, marginRight: 8, marginBottom: 8 }}>{tag}</span>
+                    <span key={tag} style={{ display: 'inline-block', padding: isMobile ? '0.2em 1em' : '2px 12px', borderRadius: isMobile ? '2vw' : 16, background: 'linear-gradient(90deg, #FFF9C4 0%, #FFE0B2 100%)', color: '#FF9800', fontSize: isMobile ? 'clamp(0.9rem, 3vw, 1rem)' : 16, fontWeight: 600, marginRight: isMobile ? '1vw' : 8, marginBottom: isMobile ? '1vw' : 8 }}>{tag}</span>
                   ))}
                 </div>
                 {meta && meta.author && (
-                  <div style={{ fontSize: 15, color: '#aaa' }}>作者：{meta.author}</div>
+                  <div style={{ fontSize: isMobile ? 'clamp(0.9rem, 3vw, 1rem)' : 15, color: '#aaa' }}>作者：{meta.author}</div>
                 )}
               </div>
             </div>
@@ -319,18 +304,18 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
         )}
         {/* 行动号召/结论区 */}
         {cta && (
-          <div style={{ paddingLeft: 24, paddingRight: 24 }}>
+          <div style={{ paddingLeft: isMobile ? '2vw' : 24, paddingRight: isMobile ? '2vw' : 24 }}>
             <div style={{
               background: '#18181b',
-              borderRadius: 12,
+              borderRadius: isMobile ? '3vw' : 12,
               boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
-              padding: 32,
-              marginBottom: 24,
+              padding: isMobile ? '6vw 4vw' : 32,
+              marginBottom: isMobile ? '2vw' : 24,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
             }}>
-              <span style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 12 }}>{cta}</span>
+              <span style={{ fontSize: isMobile ? 'clamp(1rem, 4vw, 1.2rem)' : 20, fontWeight: 700, color: '#fff', marginBottom: isMobile ? '1vw' : 12 }}>{cta}</span>
             </div>
           </div>
         )}
