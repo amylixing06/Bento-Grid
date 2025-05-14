@@ -1,3 +1,4 @@
+// force redeploy for mobile centering fix
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
