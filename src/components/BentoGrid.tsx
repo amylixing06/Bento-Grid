@@ -237,7 +237,7 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
                       {section.items && section.items.map((item, i) => (
                         <li key={i}>
                           <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4, display: 'flex', alignItems: 'center' }}>
-                            <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 6, background: 'linear-gradient(90deg, #FFD600 0%, #FF9800 100%)', color: '#fff', marginRight: 8, fontSize: 16 }}>
+                            <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 6, background: 'linear-gradient(90deg, #FFD600 0%, #FFB300 100%)', color: '#222', fontWeight: 700, fontSize: 16, marginRight: 8 }}>
                               {item.label}
                             </span>
                           </div>
