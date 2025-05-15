@@ -128,6 +128,51 @@ export default function Home() {
                     }}
                   />
                 </div>
+                <div className="flex gap-2 flex-wrap justify-center mt-4" style={{ width: 820, maxWidth: 820, margin: '0 auto', alignSelf: 'center' }}>
+                  <button
+                    onClick={async () => {
+                      const bentoEl = document.getElementById('bento-container');
+                      if (bentoEl) {
+                        try {
+                          const dataUrl = await toPng(bentoEl, {
+                            quality: 1.0,
+                            pixelRatio: 2,
+                            backgroundColor: '#111827',
+                          });
+                          const link = document.createElement('a');
+                          link.download = 'bento-grid.png';
+                          link.href = dataUrl;
+                          link.click();
+                        } catch (e) {
+                          alert('图片导出失败，请手动截图');
+                        }
+                      }
+                    }}
+                    className="btn-primary mt-4"
+                  >
+                    下载高清图片
+                  </button>
+                  <button
+                    onClick={() => {
+                      // 预览高清图片，跳转到 /bento-render?id=xxx
+                      const previewId = 'preview-' + Date.now();
+                      localStorage.setItem(previewId, JSON.stringify(analyzedContent));
+                      const renderUrl = `${window.location.origin}/bento-render?id=${previewId}`;
+                      window.open(renderUrl, '_blank');
+                    }}
+                    className="mt-4"
+                    style={{
+                      background: '#e0e0e0',
+                      color: '#333',
+                      borderRadius: 16,
+                      fontWeight: 600,
+                      padding: '0.75rem 2.5rem',
+                      boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
+                    }}
+                  >
+                    预览高清图片
+                  </button>
+                </div>
               </div>
             )}
           </div>
