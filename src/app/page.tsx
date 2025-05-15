@@ -96,9 +96,9 @@ export default function Home() {
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div
                   style={{
-                    width: 830,
-                    minWidth: 830,
-                    maxWidth: 830,
+                    width: 860,
+                    minWidth: 860,
+                    maxWidth: 860,
                     margin: '0 auto',
                     display: 'flex',
                     justifyContent: 'center',
@@ -111,7 +111,7 @@ export default function Home() {
                   }}
                   id="bento-container"
                 >
-                  <div style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '0 auto', display: 'block', background: '#111827', borderRadius: 12, boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)' }}>
+                  <div style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '10px auto', display: 'block', background: '#232526', borderRadius: 12, boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)' }}>
                     <BentoGrid
                       title={analyzedContent.title}
                       subtitle={analyzedContent.summary}
