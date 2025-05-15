@@ -128,44 +128,6 @@ body {
   line-height: 1.2 !important;
 }
 
-/* 确保移动端全屏展示，不出现间隙 */
-@media (max-width: 640px) {
-  body {
-    @apply bg-gray-50;
-    background-image: none !important;
-  }
-  
-  .mobile-bg {
-    background: #232526 !important;
-    background-image: none !important;
-  }
-  
-  #bento-container {
-    width: calc(100vw - 8px) !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    padding: 0 !important;
-    margin: 0 auto !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-  }
-  
-  /* 修复移动端容器宽度 */
-  .container {
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-    padding-left: 4px !important;
-    padding-right: 4px !important;
-    box-sizing: border-box !important;
-  }
-  
-  main {
-    width: 100%;
-    overflow-x: hidden;
-  }
-}
-
 /* 纯净版页面专用样式 */
 .bento-render-page {
   background-color: #111827 !important;
@@ -177,22 +139,11 @@ body {
   overflow-x: hidden;
 }
 
-/* 适应小屏幕的额外样式 */
-@media (max-width: 820px) {
-  #bento-container {
-    width: calc(100vw - 8px) !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    padding: 0 !important;
-    margin: 0 auto !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-  }
-  
-  /* 调整卡片内边距 */
-  #bento-container > div > div {
-    padding: 16px !important;
-  }
+html, body, .home-page, .container, main {
+  min-height: 100vh !important;
+  height: auto !important;
+  overflow-y: auto !important;
+  position: static !important;
 }
 
 html, body {

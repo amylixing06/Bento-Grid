@@ -111,7 +111,7 @@ export default function Home() {
                   }}
                   id="bento-container"
                 >
-                  <div style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '10px auto', display: 'block', background: '#3a3c3e', borderRadius: 12, boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)' }}>
+                  <div style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '10px auto', display: 'block', background: '#3a3c3e', borderRadius: 12, boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)', padding: '8px 0' }}>
                     <BentoGrid
                       title={analyzedContent.title}
                       subtitle={analyzedContent.summary}

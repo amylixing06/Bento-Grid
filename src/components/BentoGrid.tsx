@@ -104,8 +104,9 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
           margin: '0 auto',
           display: 'block',
           boxSizing: 'border-box',
-          background: '#111827',
+          background: '#3a3c3e',
           borderRadius: 12,
+          padding: '8px 0',
         }}
         ref={gridRef}
         id="bento-container"
