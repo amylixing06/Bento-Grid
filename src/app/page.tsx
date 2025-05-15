@@ -104,14 +104,14 @@ export default function Home() {
                     justifyContent: 'center',
                     alignItems: 'center',
                     boxSizing: 'border-box',
-                    background: '#111827',
+                    background: '#fff',
                     borderRadius: 16,
                     boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
                     padding: 0,
                   }}
                   id="bento-container"
                 >
-                  <div style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '0 auto', display: 'block' }}>
+                  <div style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '0 auto', display: 'block', background: '#111827', borderRadius: 12, boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)' }}>
                     <BentoGrid
                       title={analyzedContent.title}
                       subtitle={analyzedContent.summary}
