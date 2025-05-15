@@ -94,24 +94,9 @@ export default function Home() {
 
             {analyzedContent && (
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div
-                  style={{
-                    width: 860,
-                    minWidth: 860,
-                    maxWidth: 860,
-                    margin: '0 auto',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    boxSizing: 'border-box',
-                    background: '#fff',
-                    borderRadius: 16,
-                    boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
-                    padding: 0,
-                  }}
-                  id="bento-container"
-                >
-                  <div style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '10px auto', display: 'block', background: '#3a3c3e', borderRadius: 12, boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)', padding: '8px 0' }}>
+                {/* 图片容器开始 */}
+                <div id="image-export-container" style={{ width: 900, minWidth: 900, maxWidth: 900, background: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px 0', boxSizing: 'border-box' }}>
+                  <div style={{ width: 820, minWidth: 820, maxWidth: 820, background: '#888883', borderRadius: 12, boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)', padding: '40px', boxSizing: 'border-box', display: 'block', margin: '0 auto' }}>
                     <BentoGrid
                       title={analyzedContent.title}
                       subtitle={analyzedContent.summary}
@@ -133,16 +118,16 @@ export default function Home() {
                     />
                   </div>
                 </div>
+                {/* 图片容器结束 */}
                 <div className="flex gap-2 flex-wrap justify-center mt-4" style={{ width: 830, maxWidth: 830, margin: '0 auto', alignSelf: 'center' }}>
                   <button
                     onClick={async () => {
-                      const bentoEl = document.querySelector('#bento-container > div') as HTMLElement | null;
+                      const bentoEl = document.querySelector('#bento-container') as HTMLElement | null;
                       if (bentoEl) {
                         try {
                           const dataUrl = await toPng(bentoEl, {
                             quality: 1.0,
-                            pixelRatio: 2,
-                            backgroundColor: '#3a3c3e',
+                            pixelRatio: 2
                           });
                           const link = document.createElement('a');
                           link.download = 'bento-grid.png';

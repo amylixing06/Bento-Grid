@@ -84,13 +84,13 @@ function BentoContent() {
       const params = new URLSearchParams(window.location.search);
       if (params.get('download') === '1') {
         setTimeout(async () => {
-          const bentoEl = document.getElementById('bento-container');
+          const bentoEl = document.querySelector('#bento-container') as HTMLElement | null;
           if (bentoEl) {
             try {
               const dataUrl = await toPng(bentoEl, {
                 quality: 1.0,
                 pixelRatio: 2,
-                backgroundColor: '#111827',
+                backgroundColor: '#888883',
               });
               const link = document.createElement('a');
               link.download = 'bento-grid.png';
@@ -144,7 +144,7 @@ function BentoContent() {
         alignItems: 'flex-start',
       }}
     >
-      <div id="bento-container" style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '0 auto' }}>
+      <div id="bento-container" style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '0 auto', padding: '20px', background: '#888883', borderRadius: 12 }}>
         <BentoGrid
           title={analyzedContent.title}
           subtitle={analyzedContent.summary}
