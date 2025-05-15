@@ -146,6 +146,7 @@ function BentoContent() {
     >
       <div id="bento-container" style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '0 auto' }}>
         <BentoGrid
+          forceDesktop
           title={analyzedContent.title}
           subtitle={analyzedContent.summary}
           tags={analyzedContent.tags}
