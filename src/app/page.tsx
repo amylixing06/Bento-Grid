@@ -96,42 +96,47 @@ export default function Home() {
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div
                   style={{
-                    width: 820,
-                    minWidth: 820,
-                    maxWidth: 820,
+                    width: 830,
+                    minWidth: 830,
+                    maxWidth: 830,
                     margin: '0 auto',
-                    display: 'block',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
                     boxSizing: 'border-box',
                     background: '#111827',
-                    borderRadius: 12,
+                    borderRadius: 16,
+                    boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+                    padding: 0,
                   }}
-                  ref={bentoRef}
                   id="bento-container"
                 >
-                  <BentoGrid
-                    title={analyzedContent.title}
-                    subtitle={analyzedContent.summary}
-                    tags={analyzedContent.tags}
-                    author={analyzedContent.author}
-                    rawContent={analyzedContent.rawContent}
-                    sections={Array.isArray(analyzedContent.sections)
-                      ? analyzedContent.sections.map((item) =>
-                          typeof item === 'string'
-                            ? { title: item, items: [] }
-                            : item
-                        )
-                      : []}
-                    meta={{
-                      title: analyzedContent.title,
-                      author: analyzedContent.author,
-                      url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
-                    }}
-                  />
+                  <div style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '0 auto', display: 'block' }}>
+                    <BentoGrid
+                      title={analyzedContent.title}
+                      subtitle={analyzedContent.summary}
+                      tags={analyzedContent.tags}
+                      author={analyzedContent.author}
+                      rawContent={analyzedContent.rawContent}
+                      sections={Array.isArray(analyzedContent.sections)
+                        ? analyzedContent.sections.map((item) =>
+                            typeof item === 'string'
+                              ? { title: item, items: [] }
+                              : item
+                          )
+                        : []}
+                      meta={{
+                        title: analyzedContent.title,
+                        author: analyzedContent.author,
+                        url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="flex gap-2 flex-wrap justify-center mt-4" style={{ width: 820, maxWidth: 820, margin: '0 auto', alignSelf: 'center' }}>
+                <div className="flex gap-2 flex-wrap justify-center mt-4" style={{ width: 830, maxWidth: 830, margin: '0 auto', alignSelf: 'center' }}>
                   <button
                     onClick={async () => {
-                      const bentoEl = document.getElementById('bento-container');
+                      const bentoEl = document.querySelector('#bento-container > div') as HTMLElement | null;
                       if (bentoEl) {
                         try {
                           const dataUrl = await toPng(bentoEl, {
@@ -149,6 +154,12 @@ export default function Home() {
                       }
                     }}
                     className="btn-primary mt-4"
+                    style={{
+                      borderRadius: 2,
+                      fontWeight: 600,
+                      padding: '0.75rem 2.5rem',
+                      boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
+                    }}
                   >
                     下载高清图片
                   </button>
@@ -164,7 +175,7 @@ export default function Home() {
                     style={{
                       background: '#e0e0e0',
                       color: '#333',
-                      borderRadius: 16,
+                      borderRadius: 2,
                       fontWeight: 600,
                       padding: '0.75rem 2.5rem',
                       boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
