@@ -111,7 +111,7 @@ export default function Home() {
                   }}
                   id="bento-container"
                 >
-                  <div style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '10px auto', display: 'block', background: '#232526', borderRadius: 12, boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)' }}>
+                  <div style={{ width: 820, minWidth: 820, maxWidth: 820, margin: '10px auto', display: 'block', background: '#3A3C3D', borderRadius: 12, boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)' }}>
                     <BentoGrid
                       title={analyzedContent.title}
                       subtitle={analyzedContent.summary}
@@ -142,7 +142,7 @@ export default function Home() {
                           const dataUrl = await toPng(bentoEl, {
                             quality: 1.0,
                             pixelRatio: 2,
-                            backgroundColor: '#232526',
+                            backgroundColor: '#3A3C3D',
                           });
                           const link = document.createElement('a');
                           link.download = 'bento-grid.png';
