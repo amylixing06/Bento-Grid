@@ -142,7 +142,7 @@ export default function Home() {
                           const dataUrl = await toPng(bentoEl, {
                             quality: 1.0,
                             pixelRatio: 2,
-                            backgroundColor: '#111827',
+                            backgroundColor: '#232526',
                           });
                           const link = document.createElement('a');
                           link.download = 'bento-grid.png';
