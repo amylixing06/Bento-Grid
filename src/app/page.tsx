@@ -22,7 +22,7 @@ interface AnalyzedContent {
   content: string;
   author?: string;
   rawContent: string;
-  sections: string[];
+  sections: Section[];
   meta?: {
     url?: string;
   };
@@ -31,13 +31,74 @@ interface AnalyzedContent {
 // 导出桌面端样式的 class 名
 const EXPORT_DESKTOP_CLASS = 'force-desktop';
 
+// 默认宣传内容
+const DEFAULT_CONTENT = {
+  title: "新视力内容营销工具",
+  summary: "一键生成结构化Bento卡片，助力品牌内容传播",
+  keyPoints: [],
+  wordCount: 0,
+  readingTime: 0,
+  content: '',
+  author: "",
+  rawContent: "",
+  sections: [
+    {
+      title: "产品亮点",
+      items: [
+        { label: "官网产品宣传", value: "支持输入品牌或产品URL" },
+        { label: "支持博客文章", value: "自动抓取正文、标题等" },
+        { label: "智能分析内容", value: "输出多分区卡片结构" }
+      ]
+    },
+    {
+      title: "特色功能",
+      items: [
+        { label: "多分区卡片", value: "智能产品介绍、二维码等展示" },
+        { label: "一键营销", value: "高清Bento Grid营销" },
+        { label: "社交分享", value: "社交媒体分享与知识内容展示" }
+      ]
+    },
+    {
+      title: "下载体验",
+      items: [
+        { label: "官网体验", value: "www.ainew.cc" },
+        { label: "安装应用", value: "支持Chrome应用安装" },
+        { label: "部署安装", value: "Github开源克隆" }
+      ]
+    }
+  ],
+  tags: ["内容营销", "Bento卡片", "智能分析", "社交分享"],
+  meta: {
+    title: "新视力内容营销工具",
+    url: "https://www.ainew.cc"
+  }
+};
+
 export default function Home() {
   const [content, setContent] = useState<string>('');
-  const [analyzedContent, setAnalyzedContent] = useState<AnalyzedContent | null>(null);
+  const [analyzedContent, setAnalyzedContent] = useState<AnalyzedContent | null>(DEFAULT_CONTENT);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const bentoRef = useRef<HTMLDivElement>(null);
+
+  // 自动恢复上次数据
+  useEffect(() => {
+    const lastContent = localStorage.getItem('bento_last_content');
+    const lastAnalyzed = localStorage.getItem('bento_last_analyzed');
+    console.log('恢复lastContent:', lastContent);
+    console.log('恢复lastAnalyzed:', lastAnalyzed);
+    if (lastContent) setContent(lastContent);
+    if (lastAnalyzed) {
+      setAnalyzedContent(JSON.parse(lastAnalyzed));
+    }
+  }, []);
+
+  // 数据变化时自动保存
+  useEffect(() => {
+    if (content) localStorage.setItem('bento_last_content', content);
+    if (analyzedContent) localStorage.setItem('bento_last_analyzed', JSON.stringify(analyzedContent));
+  }, [content, analyzedContent]);
 
   const handleSubmit = async (text: string, isUrl: boolean): Promise<void> => {
     setIsLoading(true);
@@ -122,20 +183,24 @@ export default function Home() {
                 <div className="flex gap-2 flex-wrap justify-center mt-4" style={{ width: 830, maxWidth: 830, margin: '0 auto', alignSelf: 'center' }}>
                   <button
                     onClick={async () => {
-                      const bentoEl = document.querySelector('#bento-container') as HTMLElement | null;
-                      if (bentoEl) {
-                        try {
-                          const dataUrl = await toPng(bentoEl, {
-                            quality: 1.0,
-                            pixelRatio: 2
-                          });
-                          const link = document.createElement('a');
-                          link.download = 'bento-grid.png';
-                          link.href = dataUrl;
-                          link.click();
-                        } catch (e) {
-                          alert('图片导出失败，请手动截图');
-                        }
+                      const bentoEl = document.getElementById('image-export-container') as HTMLElement | null;
+                      if (!bentoEl) {
+                        alert('导出容器未找到，请检查DOM结构');
+                        return;
+                      }
+                      try {
+                        const dataUrl = await toPng(bentoEl, {
+                          quality: 1.0,
+                          pixelRatio: 2,
+                          backgroundColor: '#fff',
+                        });
+                        const link = document.createElement('a');
+                        link.download = 'bento-grid.png';
+                        link.href = dataUrl;
+                        link.click();
+                      } catch (e) {
+                        alert('图片导出失败，请手动截图');
+                        console.error('toPng error', e);
                       }
                     }}
                     className="btn-primary mt-4"
