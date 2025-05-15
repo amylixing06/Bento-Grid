@@ -34,7 +34,6 @@ interface BentoGridProps {
     url?: string;
     [key: string]: any;
   };
-  forceDesktop?: boolean;
 }
 
 function isHighlightValue(value: string) {
@@ -89,42 +88,47 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
   cta,
   author,
   rawContent,
-  meta,
-  forceDesktop = false
+  meta
 }, ref) {
   const gridRef = useRef<HTMLDivElement>(null);
-  const isDesktop = forceDesktop;
 
   useImperativeHandle(ref, () => gridRef.current as HTMLDivElement);
 
   const handleDownload = async () => {
-    if (gridRef.current) {
+    const bentoEl = document.getElementById('bento-container');
+    if (bentoEl) {
       try {
-        const dataUrl = await toPng(gridRef.current, {
+        const dataUrl = await toPng(bentoEl, {
           quality: 1.0,
           pixelRatio: 2,
+          backgroundColor: '#111827',
         });
         const link = document.createElement('a');
         link.download = 'bento-grid.png';
         link.href = dataUrl;
         link.click();
-      } catch (error) {
-        console.error('Error generating image:', error);
+      } catch (e) {
+        alert('图片导出失败，请手动截图');
       }
     }
   };
 
   return (
     <>
-      <div ref={gridRef} style={{
-        width: 820,
-        maxWidth: 820,
-        margin: '0 auto',
-        borderRadius: 8,
-        background: 'linear-gradient(135deg, #232526 0%, #414345 100%)',
-        padding: 24,
-        boxSizing: 'border-box',
-      }}>
+      <div
+        style={{
+          width: 820,
+          minWidth: 820,
+          maxWidth: 820,
+          margin: '0 auto',
+          display: 'block',
+          boxSizing: 'border-box',
+          background: '#111827',
+          borderRadius: 12,
+        }}
+        ref={gridRef}
+        id="bento-container"
+      >
         {/* 主标题卡片（始终顶部） */}
         <div style={{ paddingLeft: 24, paddingRight: 24 }}>
           {(title || subtitle) && (
@@ -314,6 +318,9 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
           </div>
         )}
       </div>
+      <button onClick={handleDownload} className="btn-primary mt-4">
+        下载高清图片
+      </button>
     </>
   );
 });

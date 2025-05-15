@@ -38,23 +38,11 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const bentoRef = useRef<HTMLDivElement>(null);
-  const [previewImg, setPreviewImg] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const [bentoDataId, setBentoDataId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 700);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const handleSubmit = async (text: string, isUrl: boolean): Promise<void> => {
     setIsLoading(true);
     setError(null);
     setDebugInfo(null);
-    setPreviewImg(null);
-    setBentoDataId(null);
     try {
       const response = await fetch('/api/process', {
         method: 'POST',
@@ -73,35 +61,12 @@ export default function Home() {
       setContent(text);
       setAnalyzedContent(data);
       setDebugInfo('已完成，下滑到底部，可下载高清图片');
-
-      // 生成唯一ID并存储
-      const newId = uuidv4();
-      setBentoDataId(newId);
-      localStorage.setItem(newId, JSON.stringify(data));
     } catch (err) {
       setError(err instanceof Error ? err.message : '处理内容时出错');
     } finally {
       setIsLoading(false);
     }
   };
-
-  // 获取缩略图blob并生成本地URL
-  async function fetchScreenshot(bentoUrl: string) {
-    const res = await fetch('https://xianwenai.com/screenshot', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: bentoUrl, width: 360, selector: '#bento-container' })
-    });
-    const blob = await res.blob();
-    return URL.createObjectURL(blob);
-  }
-
-  useEffect(() => {
-    if (isMobile && bentoDataId) {
-      const bentoUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
-      fetchScreenshot(bentoUrl).then(setPreviewImg);
-    }
-  }, [isMobile, bentoDataId]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -129,113 +94,39 @@ export default function Home() {
 
             {analyzedContent && (
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                {/* 移动端展示后端截图服务生成的缩略图 */}
-                {isMobile && previewImg ? (
-                  <img
-                    src={previewImg}
-                    alt="BentoGrid缩略图"
-                    style={{
-                      width: 'calc(100vw - 8px)',
-                      maxWidth: 420,
-                      borderRadius: 12,
-                      margin: '0 auto',
-                      boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
-                      background: '#111827',
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={
-                      isMobile
-                        ? {
-                            width: 820,
-                            minWidth: 820,
-                            maxWidth: 820,
-                            margin: '0 auto',
-                            boxSizing: 'border-box',
-                            display: 'block',
-                            transform: `scale(${window.innerWidth / 820})`,
-                            transformOrigin: 'top center',
-                          }
-                        : {
-                            width: 820,
-                            minWidth: 820,
-                            maxWidth: 820,
-                            margin: '0 auto',
-                            display: 'block',
-                          }
-                    }
-                    ref={bentoRef}
-                    id="bento-container"
-                  >
-                    <BentoGrid
-                      title={analyzedContent.title}
-                      subtitle={analyzedContent.summary}
-                      tags={analyzedContent.tags}
-                      author={analyzedContent.author}
-                      rawContent={analyzedContent.rawContent}
-                      sections={Array.isArray(analyzedContent.sections)
-                        ? analyzedContent.sections.map((item) =>
-                            typeof item === 'string'
-                              ? { title: item, items: [] }
-                              : item
-                          )
-                        : []}
-                      meta={{
-                        title: analyzedContent.title,
-                        author: analyzedContent.author,
-                        url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
-                      }}
-                    />
-                  </div>
-                )}
-                <div 
-                  className="flex gap-2 flex-wrap justify-center mt-4" 
-                  style={{ 
-                    width: isMobile ? '100%' : 820,
+                <div
+                  style={{
+                    width: 820,
+                    minWidth: 820,
                     maxWidth: 820,
                     margin: '0 auto',
-                    alignSelf: 'center'
+                    display: 'block',
+                    boxSizing: 'border-box',
+                    background: '#111827',
+                    borderRadius: 12,
                   }}
+                  ref={bentoRef}
+                  id="bento-container"
                 >
-                  <button
-                    onClick={() => {
-                      if (!analyzedContent) {
-                        alert('没有可用的内容数据');
-                        return;
-                      }
-                      const bentoDataId = uuidv4();
-                      localStorage.setItem(bentoDataId, JSON.stringify(analyzedContent));
-                      const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}&download=1`;
-                      window.open(renderUrl, '_blank');
+                  <BentoGrid
+                    title={analyzedContent.title}
+                    subtitle={analyzedContent.summary}
+                    tags={analyzedContent.tags}
+                    author={analyzedContent.author}
+                    rawContent={analyzedContent.rawContent}
+                    sections={Array.isArray(analyzedContent.sections)
+                      ? analyzedContent.sections.map((item) =>
+                          typeof item === 'string'
+                            ? { title: item, items: [] }
+                            : item
+                        )
+                      : []}
+                    meta={{
+                      title: analyzedContent.title,
+                      author: analyzedContent.author,
+                      url: analyzedContent.meta?.url || (content && content.startsWith('http') ? content : '')
                     }}
-                    className="btn-primary mt-4"
-                  >
-                    下载高清图片
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (!analyzedContent) {
-                        alert('没有可用的内容数据');
-                        return;
-                      }
-                      const bentoDataId = uuidv4();
-                      localStorage.setItem(bentoDataId, JSON.stringify(analyzedContent));
-                      const renderUrl = `${window.location.origin}/bento-render?id=${bentoDataId}`;
-                      window.open(renderUrl, '_blank');
-                    }}
-                    className="mt-4"
-                    style={{
-                      background: '#e0e0e0',
-                      color: '#333',
-                      borderRadius: 16,
-                      fontWeight: 600,
-                      padding: '0.75rem 2.5rem',
-                      boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)'
-                    }}
-                  >
-                    预览高清图片
-                  </button>
+                  />
                 </div>
               </div>
             )}
