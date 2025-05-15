@@ -47,3 +47,7 @@
 
 ## 贡献方式
 欢迎提交 Issue 或 PR，完善功能和体验。 
+
+<div className="card mb-8">
+  <InputForm onSubmit={handleSubmit} placeholder="粘贴链接或输入内容..." hideUrlOption debugInfo={debugInfo} />
+</div> 
