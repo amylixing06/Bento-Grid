@@ -208,7 +208,7 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
                   >
                     {/* 分区标题 */}
                     {section.title && (
-                      <div style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 24, display: 'flex', alignItems: 'center' }}>
+                      <div style={{ fontSize: 22, fontWeight: 700, color: '#aaa', marginBottom: 24, display: 'flex', alignItems: 'center' }}>
                         {section.title.includes('吸引') && <span className="mr-2">🧲</span>}
                         {section.title.includes('激发') && <span className="mr-2">💡</span>}
                         {section.title.includes('引导') && <span className="mr-2">🚩</span>}
@@ -220,11 +220,11 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
                       {section.items && section.items.map((item, i) => (
                         <li key={i}>
                           <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4, display: 'flex', alignItems: 'center' }}>
-                            <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 6, background: 'linear-gradient(90deg, #FFD600 0%, #FFB300 100%)', color: '#222', fontWeight: 700, fontSize: 16, marginRight: 8 }}>
+                            <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 6, background: 'linear-gradient(90deg, #FFD600 0%, #FFB300 100%)', color: '#222', fontWeight: 700, fontSize: 15, marginRight: 8 }}>
                               {item.label}
                             </span>
                           </div>
-                          <div style={{ color: '#ccc', fontSize: 16, marginLeft: 4 }}>{item.value}</div>
+                          <div style={{ color: '#ccc', fontSize: 13, marginLeft: 4 }}>{item.value}</div>
                         </li>
                       ))}
                     </ul>
@@ -265,7 +265,7 @@ const BentoGrid = forwardRef<HTMLDivElement, BentoGridProps>(function BentoGrid(
               </div>
               {/* 右侧内容 */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 12, lineHeight: '32px' }}>{meta && meta.title ? meta.title : '原文标题'}</div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: '#aaa', marginBottom: 12, lineHeight: '32px' }}>{meta && meta.title ? meta.title : '原文标题'}</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
                   {tags.map((tag) => (
                     <span key={tag} style={{ display: 'inline-block', padding: '2px 12px', borderRadius: 16, background: 'linear-gradient(90deg, #FFF9C4 0%, #FFE0B2 100%)', color: '#FF9800', fontSize: 16, fontWeight: 600, marginRight: 8, marginBottom: 8 }}>{tag}</span>

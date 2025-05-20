@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3004",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@stagewise/toolbar-next": "^0.1.2",
+    "@supabase/supabase-js": "^2.49.5",
     "@types/uuid": "^10.0.0",
     "cheerio": "^1.0.0",
     "html-to-image": "^1.11.11",

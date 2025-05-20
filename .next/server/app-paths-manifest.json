@@ -1,5 +1,5 @@
 {
-  "/api/process/route": "app/api/process/route.js",
   "/page": "app/page.js",
-  "/bento-render/page": "app/bento-render/page.js"
+  "/login/page": "app/login/page.js",
+  "/register/page": "app/register/page.js"
 }

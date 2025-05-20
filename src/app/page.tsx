@@ -8,6 +8,9 @@ import type { Section } from '@/components/BentoGrid';
 import dynamic from 'next/dynamic';
 import { v4 as uuidv4 } from 'uuid';
 import { toPng } from 'html-to-image';
+import { supabase } from '../../lib/supabaseClient';
+import Link from 'next/link'
+import type { AuthError, User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 const Zoom = dynamic(() => import('react-medium-image-zoom'), { ssr: false });
 import 'react-medium-image-zoom/dist/styles.css';
@@ -38,6 +41,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const bentoRef = useRef<HTMLDivElement>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   const handleSubmit = async (text: string, isUrl: boolean): Promise<void> => {
     setIsLoading(true);
@@ -68,9 +72,61 @@ export default function Home() {
     }
   };
 
+  // 只在客户端读取 localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const lastContent = localStorage.getItem('bento_last_content');
+      if (lastContent) setContent(lastContent);
+
+      const lastAnalyzed = localStorage.getItem('bento_last_analyzed');
+      if (lastAnalyzed) setAnalyzedContent(JSON.parse(lastAnalyzed));
+    }
+  }, []);
+
+  // 数据变化时自动保存
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (content !== undefined) localStorage.setItem('bento_last_content', content);
+      if (analyzedContent) localStorage.setItem('bento_last_analyzed', JSON.stringify(analyzedContent));
+    }
+  }, [content, analyzedContent]);
+
+  useEffect(() => {
+    // 获取当前登录用户
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+    // 监听登录状态变化
+    const { data: listener } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      setUser(session?.user || null);
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
+  }, []);
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="home-page">
+      {/* 顶部导航栏 */}
+      <nav className="w-full flex justify-end items-center px-8 py-4 bg-transparent absolute top-0 left-0 z-10">
+        {user ? (
+          <div className="flex items-center gap-4">
+            <span className="text-gray-700 font-semibold">
+              {user.email?.replace(/@.+$/, '') || '用户'}
+            </span>
+            <button
+              onClick={async () => { await supabase.auth.signOut(); }}
+              className="text-gray-400 hover:text-red-500 px-3 py-1 rounded transition border border-gray-200 hover:border-red-400"
+            >退出</button>
+          </div>
+        ) : (
+          <>
+            <Link href="/login" className="text-indigo-600 hover:text-indigo-800 font-semibold px-4 py-2 rounded transition">登录</Link>
+            <Link href="/register" className="ml-2 text-white bg-indigo-500 hover:bg-indigo-600 font-semibold px-4 py-2 rounded transition">注册</Link>
+          </>
+        )}
+      </nav>
+      <div className="home-page pt-20">
         <div className="container mx-auto px-4 py-12" style={{ maxWidth: '900px' }}>
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
