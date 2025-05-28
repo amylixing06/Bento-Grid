@@ -164,6 +164,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* 顶部导航栏 */}
+      {/*
       <nav className="w-full flex justify-end items-center px-8 py-4 bg-transparent absolute top-0 left-0 z-10">
         {user ? (
           <div className="flex items-center gap-4">
@@ -182,6 +183,7 @@ export default function Home() {
           </>
         )}
       </nav>
+      */}
       <div className="home-page pt-20">
         <div className="container mx-auto px-4 py-12" style={{ maxWidth: '900px' }}>
           <div className="max-w-4xl mx-auto">
