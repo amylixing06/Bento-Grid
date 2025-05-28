@@ -1,0 +1,21 @@
+{
+  "name": "Bento Grid",
+  "short_name": "BentoGrid",
+  "description": "将文章或链接一键生成结构化Bento Grid卡片，支持微信文章，极致美观导出图片",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
