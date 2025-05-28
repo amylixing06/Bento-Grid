@@ -1,6 +1,7 @@
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+@import url('/fonts/inter/inter.css');
 
 :root {
   --background: 0 0% 100%;
@@ -22,6 +23,7 @@ body {
   padding: 0;
   position: relative;
   overflow-x: hidden; /* 防止水平滚动 */
+  font-family: 'Inter', Arial, sans-serif;
 }
 
 /* 主页使用统一的白色背景 */

@@ -25,7 +25,7 @@ interface AnalyzedContent {
   content: string;
   author?: string;
   rawContent: string;
-  sections: string[];
+  sections: Section[];
   meta?: {
     url?: string;
   };
@@ -34,9 +34,32 @@ interface AnalyzedContent {
 // 导出桌面端样式的 class 名
 const EXPORT_DESKTOP_CLASS = 'force-desktop';
 
+// 默认宣传内容对象
+const DEFAULT_ANALYZED_CONTENT: AnalyzedContent = {
+  title: '新视力',
+  summary: '遇见惊喜，创造新视力',
+  keyPoints: [],
+  wordCount: 0,
+  readingTime: 0,
+  tags: ['宣传', '品牌'],
+  content: '',
+  author: '新视力团队',
+  rawContent: '',
+  sections: [
+    {
+      title: '品牌介绍',
+      items: [
+        { label: '愿景', value: '遇见惊喜，创造新视力' },
+        { label: '口号', value: '新视力，发现新世界' }
+      ]
+    }
+  ],
+  meta: {}
+};
+
 export default function Home() {
   const [content, setContent] = useState<string>('');
-  const [analyzedContent, setAnalyzedContent] = useState<AnalyzedContent | null>(null);
+  const [analyzedContent, setAnalyzedContent] = useState<AnalyzedContent | null>(DEFAULT_ANALYZED_CONTENT);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
@@ -75,19 +98,67 @@ export default function Home() {
   // 只在客户端读取 localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const lastContent = localStorage.getItem('bento_last_content');
-      if (lastContent) setContent(lastContent);
+      try {
+        // 读取并验证 content
+        const lastContent = localStorage.getItem('bento_last_content');
+        if (lastContent && lastContent.trim()) {
+          setContent(lastContent);
+        }
 
-      const lastAnalyzed = localStorage.getItem('bento_last_analyzed');
-      if (lastAnalyzed) setAnalyzedContent(JSON.parse(lastAnalyzed));
+        // 读取并验证 analyzedContent
+        const lastAnalyzed = localStorage.getItem('bento_last_analyzed');
+        if (lastAnalyzed) {
+          const parsed = JSON.parse(lastAnalyzed);
+          // 严格校验数据结构的完整性
+          if (
+            parsed &&
+            typeof parsed === 'object' &&
+            parsed.title &&
+            parsed.sections &&
+            Array.isArray(parsed.sections) &&
+            parsed.sections.length > 0 &&
+            parsed.sections.every((section: any) => 
+              section && 
+              typeof section === 'object' && 
+              section.title && 
+              Array.isArray(section.items)
+            )
+          ) {
+            setAnalyzedContent(parsed);
+          } else {
+            // 数据无效，使用默认内容
+            console.log('localStorage 数据无效，使用默认内容');
+            setAnalyzedContent(DEFAULT_ANALYZED_CONTENT);
+          }
+        }
+      } catch (err) {
+        // 出错时使用默认内容
+        console.log('读取 localStorage 出错，使用默认内容', err);
+        setAnalyzedContent(DEFAULT_ANALYZED_CONTENT);
+      }
     }
   }, []);
 
-  // 数据变化时自动保存
+  // 数据变化时自动保存，增加防御性判断
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      if (content !== undefined) localStorage.setItem('bento_last_content', content);
-      if (analyzedContent) localStorage.setItem('bento_last_analyzed', JSON.stringify(analyzedContent));
+      try {
+        // 只保存有效的 content
+        if (content && content.trim()) {
+          localStorage.setItem('bento_last_content', content);
+        }
+        
+        // 只保存有效的 analyzedContent
+        if (analyzedContent && 
+            analyzedContent.title && 
+            analyzedContent.sections && 
+            analyzedContent.sections.length > 0
+        ) {
+          localStorage.setItem('bento_last_analyzed', JSON.stringify(analyzedContent));
+        }
+      } catch (err) {
+        console.log('保存到 localStorage 出错', err);
+      }
     }
   }, [content, analyzedContent]);
 
@@ -104,6 +175,9 @@ export default function Home() {
       listener?.subscription.unsubscribe();
     };
   }, []);
+
+  console.log('user', user);
+  console.log('analyzedContent', analyzedContent);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -185,8 +259,11 @@ export default function Home() {
                             quality: 1.0,
                             pixelRatio: 2
                           });
+                          // 文件名用标题，过滤非法字符
+                          let filename = analyzedContent.title || 'bento-grid';
+                          filename = filename.replace(/[/\\?%*:|"<>]/g, '').slice(0, 40) || 'bento-grid';
                           const link = document.createElement('a');
-                          link.download = 'bento-grid.png';
+                          link.download = filename + '.png';
                           link.href = dataUrl;
                           link.click();
                         } catch (e) {
