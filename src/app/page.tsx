@@ -59,7 +59,7 @@ const DEFAULT_ANALYZED_CONTENT: AnalyzedContent = {
 
 export default function Home() {
   const [content, setContent] = useState<string>('');
-  const [analyzedContent, setAnalyzedContent] = useState<AnalyzedContent | null>(DEFAULT_ANALYZED_CONTENT);
+  const [analyzedContent, setAnalyzedContent] = useState<AnalyzedContent>(DEFAULT_ANALYZED_CONTENT);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
@@ -99,41 +99,23 @@ export default function Home() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        // 读取并验证 content
         const lastContent = localStorage.getItem('bento_last_content');
         if (lastContent && lastContent.trim()) {
           setContent(lastContent);
         }
-
-        // 读取并验证 analyzedContent
         const lastAnalyzed = localStorage.getItem('bento_last_analyzed');
         if (lastAnalyzed) {
           const parsed = JSON.parse(lastAnalyzed);
-          // 严格校验数据结构的完整性
-          if (
-            parsed &&
-            typeof parsed === 'object' &&
-            parsed.title &&
-            parsed.sections &&
-            Array.isArray(parsed.sections) &&
-            parsed.sections.length > 0 &&
-            parsed.sections.every((section: any) => 
-              section && 
-              typeof section === 'object' && 
-              section.title && 
-              Array.isArray(section.items)
-            )
-          ) {
+          // 只要有 title 就恢复，否则清理 localStorage
+          if (parsed && typeof parsed === 'object' && parsed.title) {
             setAnalyzedContent(parsed);
           } else {
-            // 数据无效，使用默认内容
-            console.log('localStorage 数据无效，使用默认内容');
+            localStorage.removeItem('bento_last_analyzed');
             setAnalyzedContent(DEFAULT_ANALYZED_CONTENT);
           }
         }
       } catch (err) {
-        // 出错时使用默认内容
-        console.log('读取 localStorage 出错，使用默认内容', err);
+        localStorage.removeItem('bento_last_analyzed');
         setAnalyzedContent(DEFAULT_ANALYZED_CONTENT);
       }
     }
