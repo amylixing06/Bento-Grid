@@ -41,7 +41,6 @@ const withPWA = require('next-pwa')({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
-  manifest: '/manifest.json',
 });
 
 module.exports = withPWA(nextConfig); 
